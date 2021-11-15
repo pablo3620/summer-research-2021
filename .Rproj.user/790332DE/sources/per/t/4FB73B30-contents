@@ -1,0 +1,22 @@
+---
+title: "Assignment 4"
+author: "Pablo Paulsen 8770448"
+date: "16/09/2021"
+output: pf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+wine = read.csv('winedata/wine.data', header = F)
+colnames(wine) = c('cultivator No.', "Alcohol", "Malic acid", "Ash", "Alcalinity of ash", "Magnesium",  "Total phenols", "Flavanoids", "Nonflavanoid phenols", "Proanthocyanins", "Color intensity", "Hue", "OD280/OD315 of diluted wines", "Proline")
+```
+
+## 1
+### a)
+```{r}
+
+```
+

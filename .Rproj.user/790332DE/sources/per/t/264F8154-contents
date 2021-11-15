@@ -1,0 +1,221 @@
+---
+title: "Assignment 4"
+author: "Pablo Paulsen 8770448"
+date: "16/09/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(farff)
+library(readr)
+library(corrplot)
+library(e1071)
+library(nnet)
+library(MASS)
+library(class)
+library(caret)
+```
+
+```{r}
+#beans = readARFF('DryBeanDataset/Dry_Bean_Dataset.arff')
+#save(beans, file = "beans.rda")
+load('beans.rda')
+```
+
+## 1
+### a)
+
+### data is from
+
+\href{https://archive.ics.uci.edu/ml/datasets/Dry+Bean+Dataset}{https://archive.ics.uci.edu/ml/datasets/Dry+Bean+Dataset}
+
+#### citation
+
+KOKLU, M. and OZKAN, I.A., (2020), “Multiclass Classification of Dry Beans Using Computer Vision and Machine Learning Techniques.” Computers and Electronics in Agriculture, 174, 105507.
+DOI: https://doi.org/10.1016/j.compag.2020.105507
+
+Data being used is taken from photos of 13611 beans of different types. Various measurements of the beans were taken in terms of the pixels in the images in order to build computer vision model of the beans to distinguish the different species of beans.
+```{r}
+summary(beans)
+```
+
+There are 7 classes of beans varying in size from 522 samples for the BOMBAY bean and 3546 samples of the DERMASON bean. We can also notice that the scale of the variables vary significantly so for any model to be most useful it is worth scaling the variables (KNN)
+
+```{r}
+set.seed(1234)
+sample = sample(1:13611,10000, replace = F)
+X = as.matrix(beans[sample,-17])
+y = as.matrix(beans[sample,17])
+test = -sample
+X_test = as.matrix(beans[test,-17])
+y_test = as.matrix(beans[test,17])
+```
+for the training and test data i used 10000 points out of 13611 points of the data for the training set and left the rest for test data (around 70%ish)
+
+```{r}
+pc = prcomp(scale(as.matrix(beans[-17])))
+plot(pc,type="l",main="Variances explained by each PC")
+pc$sdev^2
+```
+Looking at the plot of variances explained by PCA we can see that the first 2 or 3 dimensions explain a majority of the variance and past 5 dimensions almost No more variation is explained. This suggests that even though our data has 16 variables, in reality it has a much lower dimensional data.
+
+```{r}
+corrplot(cor(X))
+```
+Indeed, looking at the correlation plot we can see there are some very strong correlations between the variables.
+
+```{r}
+aspect = beans$MajorAxisLength/beans$MinorAxisLength/beans$AspectRation
+paste("min: ", min(aspect), "max: ", max(aspect))
+```
+With a quick check we can see than aspect ratio is an exact combination of Major axis length / Minor axis length.
+
+```{r}
+plot(beans$ConvexArea, beans$Area, col = beans$Class)
+```
+As was visible in the corrplot the convexarea and Area seem to have a near exact correlation.
+
+Reading the research paper the data is collected from, I found out AspectRation is indeed the ratio between Major axis length / Minor axis length. Furthermore I also found many variables that are combinations of other variables. Only Area, Perimeter, MajorAxisLength, MinorAxisLength, Eccentricity, Extent are not a from a formula of other variables. As the point of this data is to build a computer vision model to automatically classify (predict) rather than to create an inference, I decided to keep all the variables, as some of the variables may help the various models find patterns in the data that could help the models get better prediction.
+
+### b)
+
+#### LDA classification using leave-one-out cross validation
+```{r}
+lda.fit = lda(Class~.,data = beans,subset = sample,CV=TRUE)
+(LDAtable = table(pred = lda.fit$class,true = beans[sample,17]))
+TPcount = 0
+for (i in 1:7) {
+  TPcount = TPcount + LDAtable[i,i]
+}
+paste("LDA CV accuracy: ", TPcount/nrow(X), "  Misclassification Count: ", nrow(X)-TPcount)
+```
+The LOOCV accuracy is 0.903. The model does seem to misclassify a lot of DERMASON beans as SIRA beans, accounting for more than 1/3rd of the total misclassifications.
+
+```{r}
+lda.fit = lda(Class~.,data = beans,subset = sample)
+lda.pred = predict(lda.fit,beans[test,-17])
+(LDAtest = table(pred = lda.pred$class, true = beans[test,17]))
+TPcount = 0
+for (i in 1:7) {
+  TPcount = TPcount + LDAtest[i,i]
+}
+paste("LDA test data prediction accuracy: ", TPcount/nrow(X_test), "  Misclassification Count: ", nrow(X_test)-TPcount)
+```
+The prediction accuracy of the model on the test data is similar at 0.910 accuracy. There  is a similar story going on with lots of DERMASON beans being predicted as SIRA beans accounting for more than 1/3rd of the total misclassifications.
+
+#### QDA classification using leave-one-out cross validation
+```{r}
+qda.fit = qda(Class~.,data = beans,subset = sample,CV=TRUE)
+(QDAtable = table(pred = qda.fit$class,true = beans[sample,17]))
+TPcount = 0
+for (i in 1:7) {
+  TPcount = TPcount + QDAtable[i,i]
+}
+paste("QDA CV accuracy: ", TPcount/nrow(X), "  Misclassification Count: ", nrow(X)-TPcount)
+```
+QDA improves the LOOCV accuracy slightly at 0.910 but still misclassifies a lot of DERMASON beans as SIRA beans. 
+
+```{r}
+qda.fit = qda(Class~.,data = beans,subset = sample)
+qda.pred = predict(qda.fit,beans[test,-17])
+(QDAtest = table(pred = qda.pred$class, true = beans[test,17]))
+TPcount = 0
+for (i in 1:7) {
+  TPcount = TPcount + QDAtest[i,i]
+}
+paste("QDA test data classification accuracy: ", TPcount/nrow(X_test), "  Misclassification Count: ", nrow(X_test)-TPcount)
+```
+With the test set the QDA model has a slightly higher prediction accuracy at 0.917, but still has the significant number of DERMASON beans predicted as SIRA beans.
+
+#### KNN classification using 10 fold cross validation
+
+```{r}
+
+Kgrid = c(1,2,3,5,7,9,11,13,15,17,20,25,36,56)
+#cant use leave one out as takes to long to run (at least 30+ minutes)
+#trControl <- trainControl(method  = "LOOCV")
+trControl <- trainControl(method  = "repeatedcv",
+                          number  = 10,
+                          repeats = 5)
+
+#fit <- train(Class ~. ,
+#            method     = "knn",
+#             preProcess = "scale", #scales the data
+#             tuneGrid   = expand.grid(k = Kgrid),
+#             trControl  = trControl,
+#             metric     = "Accuracy",
+#             data = beans[sample,])
+#save(fit, file = "knn.rda")
+load("knn.rda")
+fit
+```
+
+
+Using 10 fold cross validation (as can't use leave one out as takes to long to run) the cross validation suggests using neighbour size of 15 which gives a 10-fold cross validated accuracy of 0.922 (averaged over 5 runs of KNN runs). This is slightly better than LDA or QDA's cross validation accuracy however it is using 10-fold cross validation rather than leave-one-out cross validation. Therefore using this model to classify the test data we get 
+
+
+
+```{r}
+KNN.pred = knn(scale(beans[sample,-17]),scale(beans[test,-17]),beans[sample,17],k=15)
+(KNNtable = table(KNN.pred,beans[test,17]))
+TPcount = 0
+for (i in 1:7) {
+  TPcount = TPcount + KNNtable[i,i]
+}
+paste("LDA test data classification accuracy: ", TPcount/nrow(X_test), "  Misclassification Count: ", nrow(X_test)-TPcount)
+```
+Using k=15 for the KNN we get at accuracy of 0.930 for predictions of the test data. Most notably compared to LDA and QDA, the number of DERMASON beans predicted as SIRA beans has dropped by about half suggesting that KNN has fit to a more complicated boundary between the DERMASON and SIRA beans that LDA and QDA could not model.
+
+#### SVM with linear kernal
+```{r}
+#tune.out = tune(svm, Class~., data = beans[sample,], kernel="linear", ranges=list(cost=c(0.1, 0.3, 1, 3, 10, 30,100,300)))
+#save(tune.out, file = "SVMlinear.rda")
+load("SVMlinear.rda")
+tune.out$performances
+```
+Using CV the model has the lowest error rate when the cost is 10 with an error rate of 0.076 or an accuracy of 0.926, which is still slightly better than LDA, QDA and comparable to KNN.
+
+```{r}
+pred = predict(tune.out$best.model, beans[test,-17])
+(SVMlin = table(pred, beans[test,17]))
+TPcount = 0
+for (i in 1:7) {
+  TPcount = TPcount + SVMlin[i,i]
+}
+paste("SVM (linear kernal) test data classification accuracy: ", TPcount/nrow(X_test), "  Misclassification Count: ", nrow(X_test)-TPcount)
+```
+Using the best model from the Tune function above (cost = 10) we get a 0.936 accuracy of classification for the test data. It appears to differentiate DERMASON and SIRA beans even better than KNN which is interesting. I suggested that KNN may be better differentiating DERMASON and SIRA beans due to some complex boundary between the 2, however the linear kernel of SVM out performs even KNN on the boundary between DERMASON and SIRA beans. 
+
+#### SVM with radial kernal
+```{r}
+set.seed(1234)
+small_sample = sample(1:13611, 1000, replace=F)
+small_test = -small_sample
+#tune.out = tune(svm, Class~., data=beans[small_sample,], kernel="radial", ranges=list(cost=c(1, 3, 10, 30, 100, 300, 500), gamma=c(0.0003,0.001, 0.003, 0.01, 0.03, 0.1, 0.3, 1,3)), cross = 5)
+
+#save(tune.out, file = "SVMradial.rda")
+tune.out
+load("SVMradial.rda")
+```
+The computer would not run the full so had to only use 1000 train dataset size for the radial kernel (still took 10+ minutes to run). The 10 fold cross validation suggest that for the smaller model a cost of 3 and a gamma of 0.1 is best and it gives a cross validation accuracy of 0.927
+
+```{r}
+pred = predict(tune.out$best.model, beans[test,-17])
+(SVMrad = table(pred, beans[test,17]))
+TPcount = 0
+for (i in 1:7) {
+  TPcount = TPcount + SVMrad[i,i]
+}
+paste("SVM (radial kernal) test data classification accuracy: ", TPcount/nrow(X_test), "  Misclassification Count: ", nrow(X_test)-TPcount)
+```
+Using the best SVM with radial kernel from the cross validation the best test data classification accuracy was 9.30. This is very similar but ever so slightly lower than the linear kernel model. If I could run the full training data into the model I would likely expect the radial kernel classification accuracy to match, or even possibly beat, the linear kernel accuracy.
+
+
+
+
+### c)
+
+Using the accuracy score the SVM model with the linear kernel has the highest accuracy, so in most cases would be the best classifier for this data. However LDA and QDA both seem to misclassify a lot of DERMASON beans as SIRA beans, accounting for more than 1/3rd of the total misclassifications, while the SVM model had its errors more spread out. If the aim of the classification is to build a computer vision model in order to sort the beans, we could end up with better results if we used LDA or QDA to sort the other 5 classes of beans. We could then use another method (manual or some other new model or method) to sort between the SIRA and DERMASON beans, rather than doing all of the sorting at once using an SVM model.
+
+
