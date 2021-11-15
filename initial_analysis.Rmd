@@ -7,9 +7,10 @@ output: pdf_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-knitr::opts_chunk$set(fig.width=12, fig.height=12) 
+knitr::opts_chunk$set(fig.width=9, fig.height=5) 
 library(dplyr)
 library(ggplot2)
+library(tidyr)
 ```
 
 ```{r}
@@ -25,12 +26,12 @@ summary(data)
 ```
 ```{r}
 data %>%
-  group_by(year, month) %>% 
-  summarise(count = n())
+  group_by(year) %>% 
+  summarise(count = n_distinct(vehicle))
 
-data[year == 2018 & month == 6,] %>%
+data %>%
   group_by(region) %>% 
-  summarise(count = n()) %>% 
+  summarise(count =  n_distinct(vehicle)) %>% 
   arrange(-count)
 ```
 can't really use before 2017
@@ -44,7 +45,7 @@ for (i in 2014:2021) {
 ```
 
 
-```{r}
+```{r Fig2, echo=TRUE, fig.height=15, fig.width=15}
 par(mfrow=c(4,2))
 for (i in 2014:2021) {
   par(mar = c(4, 4, 2, 4))
@@ -72,7 +73,7 @@ ggplot(data = data[year == 2018 & month == 6,], aes(x = kwh)) + geom_density(alp
 
 ```
 
-```{r}
+```{r Fig2, echo=TRUE, fig.height=15, fig.width=15}
 par(mfrow=c(4,2))
 for (i in 2014:2021) {
   par(mar = c(4, 4, 2, 4))
@@ -85,3 +86,64 @@ for (i in 2014:2021) {
 ggplot(data = data[year == 2018 & month == 6,], aes(x = efficiency)) + geom_density(alpha = 0.5, adjust = 1)
 ```
 
+```{r}
+fuel_data = read.csv('Dunedin Fuel research/Dunedin fuel usage.csv')
+head(fuel_data)
+fuel_data$ï..month = factor(fuel_data$ï..month, levels = fuel_data$ï..month)
+```
+
+```{r Fig2, echo=TRUE, fig.height=5, fig.width=9}
+plot(as.numeric(fuel_data$ï..month), fuel_data[,3], type = 'b', col = 1 ,xaxt = "n",
+     ylim = c(min(fuel_data[,3:8]),max(fuel_data[,3:8])))
+for (i in 3:8) {
+  points(as.numeric(fuel_data$ï..month), fuel_data[,i], type = 'b', col = i-2 ,xaxt = "n")
+  axis(1, labels = as.character(fuel_data$ï..month), at = as.numeric(fuel_data$ï..month))
+}
+```
+
+
+```{r}
+mean_fuel = fuel_data %>% 
+  gather(key = "year", value = "Fuel_used", 3:8) %>% 
+  group_by(ï..month) %>% 
+  summarise(average_fuel_use = mean(Fuel_used))
+mean_fuel
+
+```
+
+```{r}
+eff = c()
+for (i in 1:12) {
+  #average power useage (kWh/km)
+  eff[i] = mean(1/data[month==i,]$efficiency, na.rm = T)
+}
+eff
+mean_fuel$power_usage = eff[c(7:12,1:6)]
+mean_fuel
+```
+
+```{r}
+par(mar = c(4, 4, 2, 4))
+plot(as.numeric(mean_fuel$ï..month), mean_fuel$average_fuel_use, type = 'b', xaxt = "n",
+     ylab = "Average fuel use of dunedin (L)", xlab = "month")
+axis(1, labels = as.character(fuel_data$ï..month), at = as.numeric(fuel_data$ï..month))
+
+par(new=TRUE)
+plot(as.numeric(mean_fuel$ï..month), mean_fuel$power_usage, xlab="", ylab="", xlim = c(1,12),
+    ylim=c(min(mean_fuel$power_usage),max(mean_fuel$power_usage)), 
+    axes=FALSE, type="b", col=4)
+mtext("Power usage of EV(kWh/km)",side=4,col=4,line=3, cex = 1) 
+axis(4, ylim=c(min(mean_fuel$power_usage),max(mean_fuel$power_usage)),
+    col=4,col.axis=4)
+legend("bottomleft", legend = c("Average fuel use of dunedin", "Power usage of EV"), col = c(1, 4), pch = 1)
+
+```
+
+```{r}
+
+plot(as.numeric(mean_fuel$ï..month), mean_fuel$average_fuel_use * mean_fuel$power_usage, type = 'b', xaxt = "n",
+     ylab = "execpted energy use of EV (L kWh/ km) ", xlab = "month")
+axis(1, labels = as.character(fuel_data$ï..month), at = as.numeric(fuel_data$ï..month))
+
+```
+numbers could probably put to some meaningful scale if use some scaler (L/km) like fuel efficiency of gas car then can just show kwh useage
