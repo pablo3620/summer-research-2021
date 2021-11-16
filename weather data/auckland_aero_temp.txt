@@ -1,0 +1,16 @@
+Station information:
+Name,Agent Number,Network Number,Latitude (dec.deg),Longitude (dec.deg),Height (m),Posn_Precision,Observing Authority
+Auckland Aero,1962,C74082,-37.00813,174.78873,7,H,N/A
+Note: Position precision types are: "W" = based on whole minutes, "T" = estimated to tenth minute,
+"G" = derived from gridref , "E" = error cases derived from gridref,
+"H" = based on GPS readings (NZGD49), "D" = by definition i.e. grid points.
+
+Form_DLY (Extended)
+(Note that non standard row charges apply. For details search the help on "fdly").
+
+UserName is = pablopaulsen
+Total number of rows output = 20069
+Number of rows remaining in subscription = 2000000
+Copyright NIWA 2021 Subject to NIWA's Terms and Conditions
+See: http://clifloecd1.niwa.co.nz/pls/niwp/doc/terms.html
+Comments to: cliflo@niwa.co.nz

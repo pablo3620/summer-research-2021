@@ -1,0 +1,18 @@
+Station information:
+Name,Agent Number,Network Number,Latitude (dec.deg),Longitude (dec.deg),Height (m),Posn_Precision,Observing Authority
+Auckland, Motat Ews,41351,A6487G,-36.86297,174.71185,16,H,Niwa
+Note: Position precision types are: "W" = based on whole minutes, "T" = estimated to tenth minute,
+"G" = derived from gridref , "E" = error cases derived from gridref,
+"H" = based on GPS readings (NZGD49), "D" = by definition i.e. grid points.
+
+ScreenObs: Hourly
+City, Station,Year, Month, Date(NZST),Time(NZST),Tair(C),Twet(C),RH(%),Tdew(C)
+
+UserName is = pablopaulsen
+Total number of rows output = 40000
+Note: The end date was revised to meet the maximum number of rows allowed per query [40000]
+or due to running out of rows in your subscription. Also, one or more datatypes may have been disabled due to the above.
+Number of rows remaining in subscription = 1920000
+Copyright NIWA 2021 Subject to NIWA's Terms and Conditions
+See: http://clifloecd1.niwa.co.nz/pls/niwp/doc/terms.html
+Comments to: cliflo@niwa.co.nz
