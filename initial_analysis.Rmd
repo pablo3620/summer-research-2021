@@ -133,10 +133,10 @@ par(new=TRUE)
 plot(as.numeric(mean_fuel$ï..month), mean_fuel$power_usage, xlab="", ylab="", xlim = c(1,12),
     ylim=c(min(mean_fuel$power_usage),max(mean_fuel$power_usage)), 
     axes=FALSE, type="b", col=4)
-mtext("Power usage of EV(kWh/km)",side=4,col=4,line=3, cex = 1) 
+mtext("Power Consumption of EV(kWh/km)",side=4,col=4,line=3, cex = 1) 
 axis(4, ylim=c(min(mean_fuel$power_usage),max(mean_fuel$power_usage)),
     col=4,col.axis=4)
-legend("bottomleft", legend = c("Average fuel use of dunedin", "Power usage of EV"), col = c(1, 4), pch = 1)
+legend("bottomleft", legend = c("Average fuel use of dunedin", "Power Consumption of EV"), col = c(1, 4), pch = 1)
 
 ```
 
@@ -222,16 +222,16 @@ mean_HDD_auckland
 ```{r}
 par(mar = c(4, 4, 2, 4))
 plot(as.numeric(mean_HDD_auckland$Month), mean_HDD_auckland$power_usage, type = 'b', xaxt = "n",
-     ylab = "Power usage of EV(kWh/km)", xlab = "Month")
+     ylab = "Power Consumption of EV(kWh/km)", xlab = "Month", main = "Auckland EV power consumption and Monthly Heating Days by Month")
 axis(1, labels = as.character(mean_HDD_auckland$Month), at = as.numeric(mean_HDD_auckland$Month))
 
 par(new=TRUE)
 plot(as.numeric(mean_HDD_auckland$Month), mean_HDD_auckland$average_HDD, xlab="", ylab="", xlim = c(1,12),
     ylim=c(min(mean_HDD_auckland$average_HDD),max(mean_HDD_auckland$average_HDD)), 
     axes=FALSE, type="b", col=4)
-mtext("Average Monthly Heating day",side=4,col=4,line=3, cex = 1) 
+mtext("Average Monthly Heating day",side=4,col=4,line=2, cex = 1) 
 axis(4, ylim=c(min(mean_HDD_auckland$average_HDD),max(mean_HDD_auckland$average_HDD)),
     col=4,col.axis=4)
-legend("topleft", legend = c( "Power usage of EV", "Monthly Heating days"), col = c(1, 4), pch = 1)
+legend("topleft", legend = c( "Power Consumption of EV", "Monthly Heating days (Base temp 16°C)"), col = c(1, 4), pch = 1)
 ```
 
