@@ -1,0 +1,5 @@
+"0","mean_fuel = fuel_data %>% "
+"0","  gather(key = ""year"", value = ""Fuel_used"", 3:8) %>% "
+"0","  group_by(ï..month) %>% "
+"0","  summarise(average_fuel_use = mean(Fuel_used))"
+"0","mean_fuel"

@@ -1,0 +1,7 @@
+"0","avg_eff_HDD_auckland = data[data$year >=2017 & region == ""Auckland"",] %>%"
+"0","  group_by(year, month) %>%"
+"0","  summarise(efficiency = mean(efficiency))"
+"2","`summarise()` has grouped output by 'year'. You can override using the `.groups` argument.
+"
+"0","avg_eff_HDD_auckland$HDD = HDD_auckland$HDD"
+"0","avg_eff_HDD_auckland"

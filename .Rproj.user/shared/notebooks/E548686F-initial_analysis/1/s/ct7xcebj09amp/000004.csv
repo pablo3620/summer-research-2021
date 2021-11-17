@@ -1,0 +1,2 @@
+"0","#ggplot(data = patient, aes(x=age))+ geom_histogram(binwidth =10, color = ""peachpuff3"", fill = ""hotpink"") + xlab(""age (years)"") + ggtitle(""histogram of patient Age"") + theme_dark() + theme(tex = element_text(size = 20))"
+"0",""

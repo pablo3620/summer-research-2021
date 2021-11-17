@@ -1,0 +1,7 @@
+"0","#data = read.csv('Ftf Efficiency Dataset/ftf_ev_efficiency_distance_models_20211006_v1.0.csv')"
+"0","#data = data[-1]"
+"0",""
+"0","attach(data)"
+"0","month_order = c(""Jan"", ""Feb"", ""Mar"", ""Apr"", ""May"", ""Jun"", ""Jul"", ""Aug"", ""Sep"", ""Oct"", ""Nov"", ""Dec"")"
+"0","data$model = as.factor(data$model)"
+"0","head(data)"
