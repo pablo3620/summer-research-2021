@@ -1,0 +1,7 @@
+"0","power = c()"
+"0","for (i in 1:12) {"
+"0","  #average power useage (kWh/km)"
+"0","  power[i] = mean(1/data[month==i,]$efficiency, na.rm = T)"
+"0","}"
+"0","mean_fuel$power_usage = power[c(7:12,1:6)]"
+"0","mean_fuel"
