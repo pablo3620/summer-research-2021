@@ -114,11 +114,8 @@ mean_fuel = fuel_data %>%
   gather(key = "year", value = "Fuel_used", c("X2017","X2018","X2019")) %>% 
   group_by(ï..month) %>% 
   summarise(average_fuel_use = mean(Fuel_used))
-mean_fuel
 
-```
 
-```{r}
 power = c()
 for (i in 1:12) {
   #average power useage (kWh/km)
@@ -325,7 +322,7 @@ plot(all_mdl_lm, col = eff_HDD_auckland$model)
 ```
 
 
-including model of car in model is worth it, interaction anova says is significant but fit does not really improve and most are not significant. i.e not really worth being concerned about how different car respond to difference in temps
+including model of car in model is worth it, interaction term anova says is significant but fit does not really improve and most are not significant. i.e not really worth being concerned about how different car respond to difference in temps
 ```{r}
 anova(all_lm,all_mdl_lm, inter_mdl_lm)
 ```
@@ -398,8 +395,8 @@ legend("topright", legend = c( "Average kWh usage", "Monthly Heating Degree days
 ```
 
 EV power used data goes to the contrary of the fuel usage data. 
-while it is clear that efficiency decreases in the winter months going by fuel usage data total power used should be less in the winter as there is more driving in the summer.
-is this cause petrol fuel efficiency is lower in summer, current EV drivers are different (early adopters or EV commute with 2nd petrol road trip car), or a regional thing?
+while it is clear that efficiency decreases in the winter months going by fuel usage data total power used should be less in the winter as there is significantly more fuel usage in the summer.
+is this cause petrol fuel efficiency is lower in summer (possibly due to AC), current EV drivers are different (early adopters or EV commute with 2nd petrol road trip car), or a regional thing?
 
 
 ```{r}
@@ -423,7 +420,8 @@ mean_HDD_auckland
 ```
 
 ```{r}
-
+#not a fair plot as is using Auckland HDD against not auckland kwh
+#just used to get an idea for power usage outside auckalnd
 par(mar = c(4, 4, 2, 4))
 plot(as.numeric(mean_HDD_auckland$Month), mean_HDD_auckland$kwh, type = 'b', xaxt = "n",
      ylab = "average kWh usage", xlab = "Month", main = "not Auckland EV average kWh usage and Monthly Heating Days by Month 2017-2019")
@@ -440,4 +438,32 @@ legend("topright", legend = c( "Average kWh usage", "Monthly Heating Degree days
 ```
 
 excluding Auckland from the data it appears that it is not a regional thing therefore could be
-petrol fuel efficiency is lower in summer or current EV drivers are different (early adopters or EV commute with 2nd petrol road trip car)?
+petrol fuel efficiency is lower in summer (possibly) or current EV drivers are different (early adopters or EV commute with 2nd petrol road trip car)?
+https://www.sciencedirect.com/science/article/pii/S1361920914000923
+shows petrol fuel efficiency is lower in the winter
+
+however 
+https://www.proquest.com/docview/2131026877?pq-origsite=gscholar&fromopenview=true
+cites paper 
+https://www.sae.org/publications/technical-papers/content/2002-01-1957/
+that AC accounts for 7% extra power usage 
+
+```{r}
+all_lm = lm(data = avg_eff_HDD_auckland,avg_kwh~HDD)
+summary(all_lm)
+plot(avg_eff_HDD_auckland$HDD,avg_eff_HDD_auckland$avg_kwh)
+abline(all_lm)
+plot(all_lm)
+```
+
+
+```{r}
+all_mdl_lm = lm(data = eff_HDD_auckland, kwh~HDD+model )
+summary(all_mdl_lm)
+plot(eff_HDD_auckland$HDD,eff_HDD_auckland$kwh, col = eff_HDD_auckland$model)
+abline(all_mdl_lm)
+plot(all_mdl_lm, col = eff_HDD_auckland$model)
+```
+linear model to try to model kWh used by number of HDD in the month is effectively useless
+only thing that can be seen is the cars that are driven more or less each month
+
