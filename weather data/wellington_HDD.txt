@@ -1,0 +1,24 @@
+Station information:
+Name,Agent Number,Network Number,Latitude (dec.deg),Longitude (dec.deg),Height (m),Posn_Precision,Observing Authority
+Wellington, Kelburn Aws,25354,E1427P,-41.28445,174.76794,125,H,Metservice
+Note: Position precision types are: "W" = based on whole minutes, "T" = estimated to tenth minute,
+"G" = derived from gridref , "E" = error cases derived from gridref,
+"H" = based on GPS readings (NZGD49), "D" = by definition i.e. grid points.
+
+
+Statistics codes in this query are:
+Code,Description,Units
+68,Total Heating Degree Days For 18c,Hdd
+Note: Statistics calculations are based on Local Time.
+Monthly extremes are recorded on the Local-Time day of the month.
+Annual extremes are recorded in the Local-Time month of the year.
+
+Stats: Combined
+
+
+UserName is = pablopaulsen
+Total number of rows output = 58
+Number of rows remaining in subscription = 1916168
+Copyright NIWA 2021 Subject to NIWA's Terms and Conditions
+See: http://clifloecd1.niwa.co.nz/pls/niwp/doc/terms.html
+Comments to: cliflo@niwa.co.nz

@@ -14,10 +14,10 @@ library(tidyr)
 ```
 
 ```{r}
-data = read.csv('../Ftf Efficiency Dataset/ftf_ev_efficiency_distance_models_20211006_v1.0.csv')
-#data = data[-1]
+data = read.csv('../Ftf Efficiency Dataset/ftf_ev_efficiency_distance_models_20211006_v1.0.csv')[-1]
 
-attach(data)
+
+#attach(data)
 month_order = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
 head(data)
 
@@ -158,7 +158,7 @@ head(temp_data,10)
 ```
 
 ```{r}
-HDD = function (data, temp = 16) {
+HDD = function (data, temp = 18) {
   mon_sum = data.frame(Year = NA, Month = NA, HDD = NA)[-1,]
   for (y in min(data$Year):max(data$Year)){
     for (m in unique(data[data$Year == y,]$Month)) {
@@ -209,17 +209,20 @@ mean_HDD_auckland = HDD_auckland %>%
 power = c()
 eff = c()
 kwh = c()
+km = c()
 for (i in 1:12) {
   #average power useage (kWh/km)
   power[i] = mean(1/data[month==i & region == "Auckland" & year >= 2017,]$efficiency, na.rm = T)
   eff[i] = mean(data[month==i & region == "Auckland" & year >= 2017,]$efficiency, na.rm = T)
   kwh[i] = mean(data[month==i & region == "Auckland" & year >= 2017,]$kwh, na.rm = T)
+  km[i] = mean(data[month==i & region == "Auckland" & year >= 2017,]$distance, na.rm = T)
   
 }
 
 mean_HDD_auckland$power_usage = power
 mean_HDD_auckland$efficiency = eff
 mean_HDD_auckland$kwh = kwh
+mean_HDD_auckland$km = km
 mean_HDD_auckland
 ```
 
@@ -365,16 +368,23 @@ mean_HDD_auckland = HDD_auckland %>%
 power = c()
 eff = c()
 kwh = c()
+km = c()
 for (i in 1:12) {
   eff[i] = mean(data[month==i & region == "Auckland" & year >= 2017 & year <= 2019,]$efficiency, na.rm = T)
   kwh[i] = mean(data[month==i & region == "Auckland" & year >= 2017 & year <= 2019,]$kwh, na.rm = T)
-  
+  km[i] = mean(data[month==i & region == "Auckland" & year >= 2017 & year <= 2019,]$distance, na.rm = T)
 }
 
 mean_HDD_auckland$power_usage = power
 mean_HDD_auckland$efficiency = eff
 mean_HDD_auckland$kwh = kwh
+mean_HDD_auckland$km = km
 mean_HDD_auckland
+```
+```{r}
+plot(as.numeric(mean_HDD_auckland$Month), mean_HDD_auckland$km, type = 'b', xaxt = "n",
+     ylab = "average km driven", xlab = "Month", main = "Auckland EV km driven 2017-2019")
+axis(1, labels = as.character(mean_HDD_auckland$Month), at = as.numeric(mean_HDD_auckland$Month))
 ```
 
 ```{r}
@@ -400,7 +410,7 @@ is this cause petrol fuel efficiency is lower in summer (possibly due to AC), cu
 
 
 ```{r}
-mean_HDD_auckland = HDD_auckland %>% 
+mean_HDD_not_auckland = HDD_auckland %>% 
   group_by(Month) %>% 
   summarise(average_HDD = mean(HDD))
 
@@ -413,26 +423,26 @@ for (i in 1:12) {
   
 }
 
-mean_HDD_auckland$power_usage = power
-mean_HDD_auckland$efficiency = eff
-mean_HDD_auckland$kwh = kwh
-mean_HDD_auckland
+mean_HDD_not_auckland$power_usage = power
+mean_HDD_not_auckland$efficiency = eff
+mean_HDD_not_auckland$kwh = kwh
+mean_HDD_not_auckland
 ```
 
 ```{r}
 #not a fair plot as is using Auckland HDD against not auckland kwh
 #just used to get an idea for power usage outside auckalnd
 par(mar = c(4, 4, 2, 4))
-plot(as.numeric(mean_HDD_auckland$Month), mean_HDD_auckland$kwh, type = 'b', xaxt = "n",
+plot(as.numeric(mean_HDD_not_auckland$Month), mean_HDD_not_auckland$kwh, type = 'b', xaxt = "n",
      ylab = "average kWh usage", xlab = "Month", main = "not Auckland EV average kWh usage and Monthly Heating Days by Month 2017-2019")
-axis(1, labels = as.character(mean_HDD_auckland$Month), at = as.numeric(mean_HDD_auckland$Month))
+axis(1, labels = as.character(mean_HDD_not_auckland$Month), at = as.numeric(mean_HDD_not_auckland$Month))
 
 par(new=TRUE)
-plot(as.numeric(mean_HDD_auckland$Month), mean_HDD_auckland$average_HDD, xlab="", ylab="", xlim = c(1,12),
-    ylim=c(min(mean_HDD_auckland$average_HDD),max(mean_HDD_auckland$average_HDD)), 
+plot(as.numeric(mean_HDD_not_auckland$Month), mean_HDD_not_auckland$average_HDD, xlab="", ylab="", xlim = c(1,12),
+    ylim=c(min(mean_HDD_not_auckland$average_HDD),max(mean_HDD_not_auckland$average_HDD)), 
     axes=FALSE, type="b", col=4)
 mtext("Average Monthly Heating Degree Days (Base temp 16°C)",side=4,col=4,line=2, cex = 1) 
-axis(4, ylim=c(min(mean_HDD_auckland$average_HDD),max(mean_HDD_auckland$average_HDD)),
+axis(4, ylim=c(min(mean_HDD_not_auckland$average_HDD),max(mean_HDD_not_auckland$average_HDD)),
     col=4,col.axis=4)
 legend("topright", legend = c( "Average kWh usage", "Monthly Heating Degree days"), col = c(1, 4), pch = 1)
 ```
