@@ -17,8 +17,9 @@ library(tidyr)
 data = read.csv('../Ftf Efficiency Dataset/ftf_ev_efficiency_distance_models_20211006_v1.0.csv')[-1]
 
 
-#attach(data)
+attach(data)
 month_order = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+month_length = c(31,28,31,30,31,30,31,31,30,31,30,31)
 head(data)
 
 ```
@@ -382,26 +383,26 @@ mean_HDD_auckland$km = km
 mean_HDD_auckland
 ```
 ```{r}
-plot(as.numeric(mean_HDD_auckland$Month), mean_HDD_auckland$km, type = 'b', xaxt = "n",
-     ylab = "average km driven", xlab = "Month", main = "Auckland EV km driven 2017-2019")
+plot(as.numeric(mean_HDD_auckland$Month), mean_HDD_auckland$km/month_length, type = 'b', xaxt = "n",
+     ylab = "average km driven per day", xlab = "Month", main = "Auckland EV km driven 2017-2019")
 axis(1, labels = as.character(mean_HDD_auckland$Month), at = as.numeric(mean_HDD_auckland$Month))
 ```
 
 ```{r}
 
 par(mar = c(4, 4, 2, 4))
-plot(as.numeric(mean_HDD_auckland$Month), mean_HDD_auckland$kwh, type = 'b', xaxt = "n",
-     ylab = "average kWh usage", xlab = "Month", main = "Auckland EV average kWh usage and Monthly Heating Days by Month 2017-2019")
+plot(as.numeric(mean_HDD_auckland$Month), mean_HDD_auckland$kwh/month_length, type = 'b', xaxt = "n",
+     ylab = "average kWh usage per day", xlab = "Month", main = "Auckland EV average kWh usage and Monthly Heating Days by Month 2017-2019")
 axis(1, labels = as.character(mean_HDD_auckland$Month), at = as.numeric(mean_HDD_auckland$Month))
 
 par(new=TRUE)
-plot(as.numeric(mean_HDD_auckland$Month), mean_HDD_auckland$average_HDD, xlab="", ylab="", xlim = c(1,12),
-    ylim=c(min(mean_HDD_auckland$average_HDD),max(mean_HDD_auckland$average_HDD)), 
+plot(as.numeric(mean_HDD_auckland$Month), mean_HDD_auckland$average_HDD/month_length, xlab="", ylab="", xlim = c(1,12),
+    ylim=c(min(mean_HDD_auckland$average_HDD/month_length),max(mean_HDD_auckland$average_HDD/month_length)), 
     axes=FALSE, type="b", col=4)
-mtext("Average Monthly Heating Degree Days (Base temp 16°C)",side=4,col=4,line=2, cex = 1) 
+mtext("Average Heating Degree Days per day (Base temp 16°C)",side=4,col=4,line=2, cex = 1) 
 axis(4, ylim=c(min(mean_HDD_auckland$average_HDD),max(mean_HDD_auckland$average_HDD)),
     col=4,col.axis=4)
-legend("topright", legend = c( "Average kWh usage", "Monthly Heating Degree days"), col = c(1, 4), pch = 1)
+legend("topright", legend = c( "Average kWh usage", "Heating Degree days"), col = c(1, 4), pch = 1)
 ```
 
 EV power used data goes to the contrary of the fuel usage data. 
@@ -476,4 +477,32 @@ plot(all_mdl_lm, col = eff_HDD_auckland$model)
 ```
 linear model to try to model kWh used by number of HDD in the month is effectively useless
 only thing that can be seen is the cars that are driven more or less each month
+
+```{r}
+card_fuel = read.csv("Downloaded stats/fuel_usage_card_transactions_data.csv", header = T)
+head(card_fuel)
+```
+
+```{r}
+plot(card_fuel$month[card_fuel$year == 2003],card_fuel$fuel_purchased[card_fuel$year == 2003],
+     type = 'b', col = 1 , ylim = c(min(card_fuel$fuel_purchased),max(card_fuel$fuel_purchased)))
+for (i in min(card_fuel$year):max(card_fuel$year)) {
+  points(card_fuel$month[card_fuel$year == i],card_fuel$fuel_purchased[card_fuel$year == i],
+     type = 'b', col = i+1-min(card_fuel$year) )
+  
+}
+```
+effect of lockdown is very obvious so probably have to remove 2020-2021
+```{r}
+mean_card_fuel = card_fuel[card_fuel$year <=2019,] %>% 
+  group_by(month) %>% 
+  summarise(avg_fuel_purchased = mean(fuel_purchased))
+head(mean_card_fuel)
+```
+
+```{r}
+plot(mean_card_fuel$month, mean_card_fuel$avg_fuel_purchased/month_length, type = 'b', xlab= 'month', ylab = 'Average Fuel Purchases per day (Million $)')
+```
+
+money spent shows a very clear upwards trend towards December (trips). with a valley in the winter. interesting that jan is lowest point. maybe new years resolutions to bike/walk or no school but not as many trips as dec?
 
