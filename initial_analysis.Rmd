@@ -11,6 +11,7 @@ knitr::opts_chunk$set(fig.width=9, fig.height=5)
 library(dplyr)
 library(ggplot2)
 library(tidyr)
+library(quantmod)
 ```
 
 ```{r}
@@ -90,9 +91,87 @@ for (i in 2017:2021) {
   points(cur_year$month, cur_year$median_kwh, type = 'b', col = 2)
 }
 ```
+
 ```{r}
-ggplot(data = data[year == 2018 & month == 6,], aes(x = efficiency)) + geom_density(alpha = 0.5, adjust = 1)
+monthly_data = data[year >= 2017,] %>% 
+  group_by(year, month) %>% 
+  summarise(mean_kwh = mean(kwh), mean_dist = mean(distance), median_kwh = median(kwh), median_dist = median(distance), mean_ef = mean(efficiency))
+monthly_data$m = 1:nrow(monthly_data)
 ```
+
+```{r}
+plot(x = monthly_data$m, y = monthly_data$mean_ef, type = 'l')
+```
+
+try a couple of models
+```{r}
+monthly_eff_lm = lm(mean_ef ~ m+factor(month),data = monthly_data)
+summary(monthly_eff_lm)
+```
+```{r}
+monthly_eff_qm = lm(mean_ef ~ m+I(m^2)+factor(month),data = monthly_data)
+summary(monthly_eff_qm)
+```
+```{r}
+monthly_eff_lm_log = lm(mean_ef ~ m+I(log(m))+factor(month),data = monthly_data)
+summary(monthly_eff_lm_log)
+```
+```{r}
+monthly_eff_qm_log = lm(mean_ef ~ m+I(log(m))+I(m^2)+factor(month),data = monthly_data)
+summary(monthly_eff_qm_log)
+```
+
+```{r}
+anova(monthly_eff_lm, monthly_eff_qm, monthly_eff_qm_log)
+```
+
+
+
+
+```{r}
+par(mar = c(5, 4, 2, 1))
+plot(monthly_data$m, monthly_data$mean_ef, type = 'l', xaxt = "n", xlab = "", ylab = "Mean effiency of EVs", main = "Time series of EV efficiencies")
+lines(monthly_data$m, predict(monthly_eff_qm_log), col = 'red')
+
+axis(1,labels = paste(monthly_data$year, monthly_data$month, sep = "-"), at = monthly_data$m, las = 2,srt = 35)
+
+```
+
+```{r}
+plot(monthly_data$m, residuals(monthly_eff_lm), type = 'l')
+points(monthly_data$m, residuals(monthly_eff_qm), type = 'l', col = "red")
+points(monthly_data$m, residuals(monthly_eff_lm_log), type = 'l', col = "blue")
+points(monthly_data$m, residuals(monthly_eff_qm_log), type = 'l', col = "darkgreen")
+
+
+
+abline(h= 0)
+```
+
+```{r}
+eff_series = ts(monthly_data$mean_ef, frequency = 12)
+decomp_eff = stl(eff_series, s.window = "periodic")
+plot(decomp_eff)
+```
+
+```{r}
+plot(x = monthly_data$m, y = monthly_data$median_kwh, type = 'l')
+
+```
+```{r}
+monthly_kwh_lm = lm(median_kwh ~ m+factor(month),data = monthly_data)
+summary(monthly_kwh_lm)
+```
+
+```{r}
+par(mar = c(5, 4, 2, 1))
+plot(monthly_data$m, monthly_data$median_kwh, type = 'l', xaxt = "n", xlab = "", ylab = "Mean power usage of EVs", main = "Time series of EV kWh Useage")
+lines(monthly_data$m, predict(monthly_kwh_lm), col = 'red')
+
+axis(1,labels = paste(monthly_data$year, monthly_data$month, sep = "-"), at = monthly_data$m, las = 2)
+
+```
+
 
 ```{r}
 fuel_data = read.csv('Dunedin Fuel research/Dunedin fuel usage.csv')

@@ -1,0 +1,1 @@
+"0","plot(monthly_data$m, residuals(monthly_eff_lm), type = 'l')"

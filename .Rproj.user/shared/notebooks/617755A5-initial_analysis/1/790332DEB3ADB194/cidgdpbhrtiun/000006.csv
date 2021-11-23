@@ -1,0 +1,2 @@
+"0","plot(avg_eff_HDD_auckland$month[avg_eff_HDD_auckland$year == 2017], avg_eff_HDD_auckland$avg_kwh[avg_eff_HDD_auckland$year == 2017],"
+"0","     type = 'b', col = 1 , ylim = c(min(avg_eff_HDD_auckland$avg_kwh),max(avg_eff_HDD_auckland$avg_kwh)))"

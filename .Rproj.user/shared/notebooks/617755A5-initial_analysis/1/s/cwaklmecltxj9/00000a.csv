@@ -1,0 +1,2 @@
+"0","plot(card_fuel$month[card_fuel$year == 2003],card_fuel$fuel_purchased[card_fuel$year == 2003],"
+"0","     type = 'b', col = 1 , ylim = c(min(card_fuel$fuel_purchased),max(card_fuel$fuel_purchased)))"

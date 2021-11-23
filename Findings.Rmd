@@ -1,0 +1,23 @@
+---
+title: "Useful findings"
+author: "pablo paulsen"
+date: "23/11/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = F)
+knitr::opts_chunk$set(fig.width=9, fig.height=5) 
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+```
+
+```{r}
+data = read.csv('../Ftf Efficiency Dataset/ftf_ev_efficiency_distance_models_20211006_v1.0.csv')[-1]
+
+
+attach(data)
+month_order = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+month_length = c(31,28,31,30,31,30,31,31,30,31,30,31)
+```

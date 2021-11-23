@@ -1,0 +1,1 @@
+"0","points(monthly_data$m, residuals(monthly_eff_lm_log), type = 'l', col = ""blue"")"

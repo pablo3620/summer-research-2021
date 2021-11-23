@@ -1,0 +1,4 @@
+"0","mean_card_fuel = card_fuel[card_fuel$year <=2019,] %>% "
+"0","  group_by(month) %>% "
+"0","  summarise(avg_fuel_purchased = mean(fuel_purchased))"
+"0","head(mean_card_fuel)"

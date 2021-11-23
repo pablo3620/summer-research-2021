@@ -1,0 +1,5 @@
+"0","for (i in 2017:2021) {"
+"0","  points(avg_eff_HDD_auckland$month[avg_eff_HDD_auckland$year == i], avg_eff_HDD_auckland$avg_kwh[avg_eff_HDD_auckland$year == i],"
+"0","      type = 'b', col = i-2016 ,xaxt = ""n"", ylim = c(min(avg_eff_HDD_auckland$avg_kwh),max(avg_eff_HDD_auckland$avg_kwh)))"
+"0","  "
+"0","}"
