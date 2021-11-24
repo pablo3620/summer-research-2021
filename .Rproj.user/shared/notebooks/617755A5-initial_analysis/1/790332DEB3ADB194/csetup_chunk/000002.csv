@@ -4,3 +4,13 @@
 "0","library(ggplot2)"
 "0","library(tidyr)"
 "0","library(quantmod)"
+"0","library(forecast)"
+"0","library(tseries)"
+"2","
+    ‘tseries’ version: 0.10-49
+
+    ‘tseries’ is a package for time series analysis and computational finance.
+
+    See ‘library(help=""tseries"")’ for details.
+
+"

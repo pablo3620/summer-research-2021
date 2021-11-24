@@ -1,0 +1,2 @@
+"0",""
+"0","axis(1,labels = paste(monthly_data$year, monthly_data$month, sep = ""-""), at = monthly_data$m, las = 2)"
