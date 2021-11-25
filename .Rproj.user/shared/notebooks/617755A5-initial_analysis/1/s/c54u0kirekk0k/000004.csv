@@ -1,0 +1,6 @@
+"0",""
+"0","fuel_cost = read.csv(""Downloaded stats/MBIE_weekly_fuel_cost.csv"")"
+"0","fuel_cost$Week_ending_Friday = as.Date(fuel_cost$Week_ending_Friday)"
+"0","fuel_cost$year = as.numeric(format(fuel_cost$Week_ending_Friday, '%Y'))"
+"0","fuel_cost$month = as.numeric(format(fuel_cost$Week_ending_Friday, '%m'))"
+"0","head(fuel_cost)"

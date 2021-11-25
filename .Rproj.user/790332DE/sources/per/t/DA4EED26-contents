@@ -1,0 +1,126 @@
+---
+title: "Useful findings"
+author: "pablo paulsen"
+date: "23/11/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = F)
+knitr::opts_chunk$set(fig.width=9, fig.height=5) 
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+library(quantmod)
+library(forecast)
+library(tseries)
+```
+
+```{r functions}
+HDD = function (data, temp = 18) {
+  mon_sum = data.frame(Year = NA, Month = NA, HDD = NA)[-1,]
+  for (y in min(data$Year):max(data$Year)){
+    for (m in unique(data[data$Year == y,]$Month)) {
+      #print(paste(y," ", m))
+      adj_temps = -data[data$Year == y & data$Month == m,]$Temp+temp
+      #print(sum(adj_temps*(adj_temps > 0))/24)
+      mon_sum[nrow(mon_sum) + 1,] = c(y,m, sum(adj_temps*(adj_temps > 0))/24)
+    }
+  }
+  mon_sum$Year = as.factor(mon_sum$Year)
+  mon_sum$Month = factor(mon_sum$Month, levels = month.abb)
+  mon_sum$HDD = as.numeric(mon_sum$HDD)
+  return(mon_sum)
+}
+
+CDD = function (data, temp = 16) {
+  mon_sum = data.frame(Year = NA, Month = NA, CDD = NA)[-1,]
+  for (y in min(data$Year):max(data$Year)){
+    for (m in levels(data$Month)) {
+      #print(paste(y," ", m))
+      adj_temps = data[data$Year == y & data$Month == m,]$Temp-temp
+      #print(sum(adj_temps*(adj_temps > 0))/24)
+      mon_sum[nrow(mon_sum) + 1,] = c(y,m, sum(adj_temps*(adj_temps > 0))/24)
+
+    }
+  }
+  mon_sum$Year = as.factor(mon_sum$Year)
+  mon_sum$Month = as.factor(mon_sum$Month)
+  mon_sum$CDD = as.numeric(mon_sum$CDD)
+  return(mon_sum)
+}
+
+yearly_line = function(period = 12, count = 10) {
+  for (i in 1:count) {
+    abline(v = i*period, lty = 3)
+  }
+}
+```
+
+
+```{r data_setup, message = FALSE}
+month_length = c(31,28,31,30,31,30,31,31,30,31,30,31)
+
+#main EV data
+EV_data = read.csv('../Ftf Efficiency Dataset/ftf_ev_efficiency_distance_models_20211006_v1.0.csv')[-1]
+attach(EV_data)
+
+#EV data with columns averaged by month
+monthly_EV_data = EV_data[year >= 2017,] %>% 
+  group_by(year, month) %>% 
+  summarise(mean_kwh = mean(kwh), mean_dist = mean(distance), median_kwh = median(kwh), median_dist = median(distance), mean_ef = mean(efficiency))
+monthly_EV_data$m = 1:nrow(monthly_EV_data)
+
+#weather data
+Auckland_weather = read.csv('weather data/auckland_motat_ews_data.csv',stringsAsFactors = T)
+Auckland_weather$Month = match(Auckland_weather$Month, month.abb)
+
+```
+
+
+```{r}
+plot(monthly_EV_data$m, monthly_EV_data$mean_ef, type = 'l', xaxt = "n", xlab = "", ylab = "Mean efficiency of EVs (km/kWh)", main = "Time series of EV efficiencies")
+axis(1,labels = paste(monthly_EV_data$year, monthly_EV_data$month, sep = "-"), at = monthly_EV_data$m, las = 2,srt = 35)
+
+yearly_line()
+```
+simple linear model with mean_eff $= t + \ln t + t^2 +$month (as factor). negative squared term means can not use for long term efficiency trend as it will got negative but allows it to better fit the seasonal trend
+
+
+```{r}
+monthly_eff_qm_log = lm(mean_ef ~ m+I(log(m))+I(m^2)+factor(month),data = monthly_EV_data)
+summary(monthly_eff_qm_log)
+```
+
+
+```{r}
+plot(monthly_EV_data$m, monthly_EV_data$mean_ef, type = 'l', xaxt = "n", xlab = "", ylab = "Mean efficiency of EVs (km/kWh)", main = "Time series of EV efficiencies")
+lines(monthly_EV_data$m, predict(monthly_eff_qm_log), col = 'red', lty = 2)
+
+yearly_line()
+axis(1,labels = paste(monthly_EV_data$year, monthly_EV_data$month, sep = "-"), at = monthly_EV_data$m, las = 2,srt = 35)
+legend("topleft", legend = c("Actual mean EV efficiency", "Modelled prediction EV efficiency"), lty = 1:2, col = 1:2)
+```
+```{r}
+eff_series = ts(monthly_EV_data$mean_ef, frequency = 12)
+adf.test(eff_series, alternative = "stationary")
+```
+we can reject null hypothesis that data is not-stationary. this makes sense as average efficiency should not have significantly changed in a couple of years. use multiplicative instead of additive as preferable to know estimated extra power use? or should i know total extra power used in season?
+
+
+```{r}
+#decomp_eff = decompose(eff_series, "multiplicative")
+decomp_eff = decompose(eff_series,"additive")
+plot(decomp_eff)
+yearly_line(period = 1)
+```
+
+```{r}
+plot(decomp_eff$figure, type = 'l', main = "Seasonal compontent of Efficiency of EV", xaxt = "n",
+     xlab = "", ylab = "Change in efficiency (km/kWh)")
+points(1:12, scale(c(0,monthly_eff_qm_log$coefficients[paste("factor(month)", 2:12, sep = "")]),scale = F),
+       type = 'l', col = "red")
+axis(1, labels = month.name, at = 1:12, las = 3)
+legend("top", legend = c("Seasonal compontent Decompostion", 'Seasonal compontent of linear model'), lty = 1, col = 1:2)
+```
+

@@ -1,0 +1,4 @@
+"0","data %>%"
+"0","  group_by(region) %>% "
+"0","  summarise(count =  n_distinct(vehicle)) %>% "
+"0","  arrange(-count)"

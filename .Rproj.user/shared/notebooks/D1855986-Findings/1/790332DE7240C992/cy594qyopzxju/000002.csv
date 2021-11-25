@@ -1,0 +1,31 @@
+"0","EV_data = read.csv('../Ftf Efficiency Dataset/ftf_ev_efficiency_distance_models_20211006_v1.0.csv')[-1]"
+"0",""
+"0",""
+"0","attach(EV_data)"
+"2","The following objects are masked from EV_data (pos = 3):
+
+    distance, efficiency, kwh, model, month, region, season, vehicle, year
+
+"
+"2","The following objects are masked from EV_data (pos = 4):
+
+    distance, efficiency, kwh, model, month, region, season, vehicle, year
+
+"
+"2","The following objects are masked from EV_data (pos = 5):
+
+    distance, efficiency, kwh, model, month, region, season, vehicle, year
+
+"
+"2","The following objects are masked from EV_data (pos = 6):
+
+    distance, efficiency, kwh, model, month, region, season, vehicle, year
+
+"
+"2","The following objects are masked from data:
+
+    distance, efficiency, kwh, model, month, region, season, vehicle, year
+
+"
+"0","month_order = c(""Jan"", ""Feb"", ""Mar"", ""Apr"", ""May"", ""Jun"", ""Jul"", ""Aug"", ""Sep"", ""Oct"", ""Nov"", ""Dec"")"
+"0","month_length = c(31,28,31,30,31,30,31,31,30,31,30,31)"

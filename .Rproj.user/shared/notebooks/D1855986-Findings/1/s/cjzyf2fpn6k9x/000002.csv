@@ -1,0 +1,7 @@
+"0","monthly_EV_data = data[year >= 2017,] %>% "
+"0","  group_by(year, month) %>% "
+"0","  summarise(mean_kwh = mean(kwh), mean_dist = mean(distance), median_kwh = median(kwh), median_dist = median(distance), mean_ef = mean(efficiency))"
+"2","`summarise()` has grouped output by 'year'. You can override using the `.groups` argument.
+"
+"0","monthly_EV_data$m = 1:nrow(monthly_EV_data)"
+"0","plot(x = monthly_EV_data$m, y = monthly_EV_data$mean_ef, type = 'l')"

@@ -1,0 +1,2 @@
+"0","fuel_data = read.csv('Dunedin Fuel research/Dunedin fuel usage.csv')"
+"0","head(fuel_data)"

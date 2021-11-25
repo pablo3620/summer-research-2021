@@ -21,7 +21,6 @@ data = read.csv('../Ftf Efficiency Dataset/ftf_ev_efficiency_distance_models_202
 
 
 attach(data)
-month_order = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
 month_length = c(31,28,31,30,31,30,31,31,30,31,30,31)
 head(data)
 
@@ -155,11 +154,11 @@ eff_series = ts(monthly_data$mean_ef, frequency = 12)
 adf.test(eff_series, alternative = "stationary")
 ```
 
-we can reject null hypothesis that data is not-stationary. this makes sense as average effiency should not have signficantly changed in a couple of years
+we can reject null hypothesis that data is not-stationary. this makes sense as average efficiency should not have significantly changed in a couple of years. use multiplicative instead of additive as preferable to know estimated extra power use? or should i know total extra power used in season?
 ```{r}
 
 #decomp_eff = stl(eff_series, s.window = "periodic")
-decomp_eff = decompose(eff_series, "additive")
+decomp_eff = decompose(eff_series, "multiplicative")
 plot(decomp_eff)
 ```
 ```{r}
@@ -301,7 +300,7 @@ HDD = function (data, temp = 18) {
     }
   }
   mon_sum$Year = as.factor(mon_sum$Year)
-  mon_sum$Month = factor(mon_sum$Month, levels = month_order)
+  mon_sum$Month = factor(mon_sum$Month, levels = month.abb)
   mon_sum$HDD = as.numeric(mon_sum$HDD)
   return(mon_sum)
 }
@@ -667,5 +666,3 @@ plot(forecast(card_fuel_model, level = 95, h = 40))
 ```{r}
 plot(card_fuel_decomp$figure, type = 'l')
 ```
-
-

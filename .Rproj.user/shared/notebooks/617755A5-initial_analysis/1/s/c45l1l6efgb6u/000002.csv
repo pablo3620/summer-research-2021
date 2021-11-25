@@ -1,0 +1,2 @@
+"0","plot(as.numeric(mean_HDD_auckland$Month), mean_HDD_auckland$km/month_length, type = 'b', xaxt = ""n"","
+"0","     ylab = ""average km driven per day"", xlab = ""Month"", main = ""Auckland EV km driven 2017-2019"")"

@@ -1,0 +1,4 @@
+"0",""
+"0","card_fuel = merge(card_fuel, month_fuel_cost, by = c(""year"", ""month""), sort = FALSE)"
+"0","card_fuel = card_fuel[card_fuel$year != 2004,]"
+"0","head(card_fuel)"

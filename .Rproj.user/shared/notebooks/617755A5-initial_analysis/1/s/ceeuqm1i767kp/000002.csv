@@ -1,0 +1,2 @@
+"0","#monthly_eff_model_lm = lm(mean_ef ~ m+factor(month)+factor(model),data = monthly_data_model)"
+"0","#summary(monthly_eff_model_lm)"

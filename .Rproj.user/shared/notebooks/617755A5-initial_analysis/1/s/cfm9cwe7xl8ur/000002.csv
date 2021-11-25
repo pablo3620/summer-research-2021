@@ -1,0 +1,5 @@
+"0","auckland_model_count = data[region == ""Auckland"",] %>%"
+"0","  group_by(model) %>% "
+"0","  summarise(count =  n_distinct(vehicle)) %>% "
+"0","  arrange(-count)"
+"0","auckland_model_count"

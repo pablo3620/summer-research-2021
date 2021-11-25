@@ -1,0 +1,3 @@
+"0","kwh_series = ts(monthly_data$median_kwh, frequency = 12)"
+"0","decomp_kwh = stl(kwh_series, s.window = ""periodic"")"
+"0","plot(decomp_kwh)"

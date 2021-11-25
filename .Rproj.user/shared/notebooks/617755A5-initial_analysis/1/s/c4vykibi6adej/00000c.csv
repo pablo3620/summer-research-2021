@@ -1,0 +1,2 @@
+"0","axis(4, ylim=c(min(mean_HDD_not_auckland$average_HDD),max(mean_HDD_not_auckland$average_HDD)),"
+"0","    col=4,col.axis=4)"
