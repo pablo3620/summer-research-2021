@@ -1,2 +1,0 @@
-"0",""
-"0","plot(mean_card_fuel$month, mean_card_fuel$avg_fuel_purchased/month_length, type = 'b', xlab= 'month', ylab = 'Average Fuel Purchases per day (Million $)')"

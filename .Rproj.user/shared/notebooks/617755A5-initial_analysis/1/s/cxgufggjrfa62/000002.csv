@@ -1,6 +1,0 @@
-"0","mean_data = list()"
-"0","for (i in 2017:2021) {"
-"0","  mean_data[[i-2016]] = data[year == i,] %>% "
-"0","    group_by(month) %>% "
-"0","    summarise(mean_kwh = mean(kwh), mean_dist = mean(distance), median_kwh = median(kwh), median_dist = median(distance), mean_ef = mean(efficiency))"
-"0","}"

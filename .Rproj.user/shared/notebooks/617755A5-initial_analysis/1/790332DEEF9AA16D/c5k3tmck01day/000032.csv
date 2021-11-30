@@ -1,3 +1,0 @@
-"0","plot(as.numeric(mean_HDD_auckland$Month), mean_HDD_auckland$average_HDD/month_length, xlab="""", ylab="""", xlim = c(1,12),"
-"0","    ylim=c(min(mean_HDD_auckland$average_HDD/month_length),max(mean_HDD_auckland$average_HDD/month_length)), "
-"0","    axes=FALSE, type=""b"", col=4)"

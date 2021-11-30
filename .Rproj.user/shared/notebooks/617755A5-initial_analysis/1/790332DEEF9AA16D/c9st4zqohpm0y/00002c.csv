@@ -1,4 +1,0 @@
-"0",""
-"0","par(mar = c(4, 4, 2, 4))"
-"0","plot(as.numeric(mean_HDD_auckland$Month), mean_HDD_auckland$kwh, type = 'b', xaxt = ""n"","
-"0","     ylab = ""average kWh usage"", xlab = ""Month"", main = ""Auckland EV average kWh usage and Monthly Heating Days by Month"")"

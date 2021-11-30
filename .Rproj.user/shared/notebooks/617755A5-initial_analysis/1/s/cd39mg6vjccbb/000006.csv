@@ -1,7 +1,0 @@
-"0","month_fuel_cost = fuel_cost %>% "
-"0","  group_by(year, month) %>% "
-"0","  summarise(petrol = mean(Regular_Petrol_discounted_retail_price_NZc.p.l), diesel = mean(Diesel_discounted_retail_price_NZc.p.l),"
-"0","            Premium = mean(Premium_Petrol_95R_discounted_retail_price_NZc.p.l))"
-"2","`summarise()` has grouped output by 'year'. You can override using the `.groups` argument.
-"
-"0","head(month_fuel_cost)"

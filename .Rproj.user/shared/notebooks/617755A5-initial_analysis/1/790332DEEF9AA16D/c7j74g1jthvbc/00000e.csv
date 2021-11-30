@@ -1,2 +1,0 @@
-"0","plot(as.numeric(fuel_data$ï..month), fuel_data[,3], type = 'b', col = 1 ,xaxt = ""n"","
-"0","     ylim = c(min(fuel_data[,3:8]),max(fuel_data[,3:8])))"

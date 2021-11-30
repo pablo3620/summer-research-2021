@@ -1,3 +1,0 @@
-"0","data %>%"
-"0","  group_by(year) %>% "
-"0","  summarise(count = n_distinct(vehicle))"

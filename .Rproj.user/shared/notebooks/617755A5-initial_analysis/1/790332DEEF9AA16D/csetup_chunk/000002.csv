@@ -1,8 +1,0 @@
-"0","knitr::opts_chunk$set(echo = TRUE)"
-"0","knitr::opts_chunk$set(fig.width=9, fig.height=5) "
-"0","library(dplyr)"
-"0","library(ggplot2)"
-"0","library(tidyr)"
-"0","library(quantmod)"
-"0","library(forecast)"
-"0","library(tseries)"

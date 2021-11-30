@@ -259,9 +259,9 @@ summary(eff_reg_lm)
 https://www.geotab.com/blog/ev-range/
 
 based on this AC should also decrease range. not too obvious in NZ as is kind of cold but in Auckland can see such a trend
-what if we include cooling degree days in analysis too? unlike this direct avgerage temp vs effiency plot this would allow for cooling and heating in the same month that could reduce effiency. could expalin the couple month that have very bad effiency, possibley have a few cold and warm days but average is nothing unsual 
+what if we include cooling degree days in analysis too? unlike this direct average temp vs efficiency plot this would allow for cooling and heating in the same month that could reduce efficiency. could explain the couple month that have very bad efficiency, possibley have a few cold and warm days but average is nothing unsual 
 
-```{r}
+```{r temp_eff_plot, message=FALSE}
 monthly_reg_EV_data[monthly_reg_EV_data$weather_region == "Auckland",] %>% ggplot(aes(avg_temp, mean_ef)) + geom_point() + geom_smooth(method = 'loess')
 ```
 

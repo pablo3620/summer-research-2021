@@ -1,3 +1,0 @@
-"0",""
-"0","plot(as.numeric(mean_fuel$ï..month), mean_fuel$average_fuel_use * mean_fuel$power_usage, type = 'b', xaxt = ""n"","
-"0","     ylab = ""execpted energy use of EV (L kWh/ km) "", xlab = ""month"")"

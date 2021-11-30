@@ -1,3 +1,0 @@
-"0","card_fuel_series = ts((card_fuel$fuel_purchased/card_fuel$petrol)/month_length, frequency = 12)"
-"2","longer object length is not a multiple of shorter object length"
-"0","plot(card_fuel_series)"

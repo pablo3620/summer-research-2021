@@ -1,1 +1,0 @@
-"0","plot(x = monthly_data$m, y = monthly_data$mean_ef, type = 'l')"

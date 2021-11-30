@@ -1,4 +1,0 @@
-"0",""
-"0","#decomp_eff = stl(eff_series, s.window = ""periodic"")"
-"0","decomp_eff = decompose(eff_series, ""additive"")"
-"0","plot(decomp_eff)"

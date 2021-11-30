@@ -1,6 +1,0 @@
-"0","#monthly_data_model = data[year >= 2017,] %>% "
-"0","#  group_by(year, month, model) %>% "
-"0","#  summarise(mean_kwh = mean(kwh), mean_dist = mean(distance), median_kwh = median(kwh), median_dist = median(distance), mean_ef = mean(efficiency))"
-"0","#monthly_data_model$m = as.numeric(factor(paste(monthly_data_model$year,monthly_data_model$month, sep = ""-""),"
-"0","#                                      levels = unique(paste(monthly_data_model$year,monthly_data_model$month, sep = ""-""))))"
-"0",""

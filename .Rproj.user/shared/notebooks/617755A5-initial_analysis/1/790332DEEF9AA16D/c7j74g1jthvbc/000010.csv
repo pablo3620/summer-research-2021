@@ -1,4 +1,0 @@
-"0","for (i in 3:8) {"
-"0","  points(as.numeric(fuel_data$ï..month), fuel_data[,i], type = 'b', col = i-2 ,xaxt = ""n"")"
-"0","  axis(1, labels = as.character(fuel_data$ï..month), at = as.numeric(fuel_data$ï..month))"
-"0","}"

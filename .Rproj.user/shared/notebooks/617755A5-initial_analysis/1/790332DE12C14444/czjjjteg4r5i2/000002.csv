@@ -1,2 +1,0 @@
-"0","card_fuel_decomp = decompose(card_fuel_series, ""multiplicative"")"
-"0","plot(card_fuel_decomp, xaxt = ""n"")"

@@ -1,1 +1,0 @@
-"0","monthly_reg_EV_data[monthly_reg_EV_data$weather_region == ""Auckland"",] %>% ggplot(aes(avg_temp, mean_ef)) + geom_point() + geom_smooth(method = 'loess')"

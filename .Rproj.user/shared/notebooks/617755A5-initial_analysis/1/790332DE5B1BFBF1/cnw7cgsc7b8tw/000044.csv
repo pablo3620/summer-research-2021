@@ -1,1 +1,0 @@
-"0","lines(monthly_data$m, predict(monthly_kwh_lm), col = 'red')"

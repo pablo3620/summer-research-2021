@@ -1,2 +1,0 @@
-"0","par(mar = c(5, 4, 2, 1))"
-"0","plot(monthly_data$m, monthly_data$mean_ef, type = 'l', xaxt = ""n"", xlab = """", ylab = ""Mean effiency of EVs"", main = ""Time series of EV efficiencies"")"

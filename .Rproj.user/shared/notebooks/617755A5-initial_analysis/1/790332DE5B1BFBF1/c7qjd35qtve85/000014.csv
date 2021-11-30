@@ -1,5 +1,0 @@
-"0","for (i in min(card_fuel$year):max(card_fuel$year)) {"
-"0","  points(card_fuel$month[card_fuel$year == i],card_fuel$fuel_purchased[card_fuel$year == i],"
-"0","     type = 'b', col = i+1-min(card_fuel$year) )"
-"0","  "
-"0","}"

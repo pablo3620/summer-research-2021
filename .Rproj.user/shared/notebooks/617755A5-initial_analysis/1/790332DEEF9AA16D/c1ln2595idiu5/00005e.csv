@@ -1,2 +1,0 @@
-"0","card_fuel = read.csv(""Downloaded stats/fuel_usage_card_transactions_data.csv"", header = T)"
-"0","head(card_fuel)"

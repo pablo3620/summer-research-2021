@@ -1,3 +1,0 @@
-"0","par(mar = c(4, 4, 2, 4))"
-"0","plot(as.numeric(mean_fuel$ï..month), mean_fuel$average_fuel_use, type = 'b', xaxt = ""n"","
-"0","     ylab = ""Average fuel use of dunedin (L)"", xlab = ""month"")"

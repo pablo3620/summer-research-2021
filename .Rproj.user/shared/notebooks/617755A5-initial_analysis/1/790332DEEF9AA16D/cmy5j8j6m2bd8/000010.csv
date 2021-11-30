@@ -1,2 +1,0 @@
-"0","efficiency_forcast = forecast(eff_model, level = 95, h = 60)"
-"0","plot(efficiency_forcast)"

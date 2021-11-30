@@ -1,8 +1,0 @@
-"0","auck_eff_series = ts(monthly_reg_EV_data$mean_ef[which(monthly_reg_EV_data$weather_region == ""Auckland"")], frequency = 12)"
-"0","decomp_auck_eff = decompose(auck_eff_series,""additive"")"
-"0","auck_HDD_series = ts(HDD_data$HDD[HDD_data$City == ""Auckland""], frequency = 12)"
-"0","decomp_auck_HDD = decompose(auck_HDD_series,""additive"")"
-"0",""
-"0","par(mar = c(4, 4, 2, 4))"
-"0","plot(decomp_auck_eff$figure, type = 'b', main = ""Auckland Seasonal Compontent Decompostions"", xaxt = ""n"","
-"0","     xlab = """", ylab = ""Change in efficiency (km/kWh)"")"

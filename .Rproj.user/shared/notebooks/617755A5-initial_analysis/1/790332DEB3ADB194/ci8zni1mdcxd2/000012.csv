@@ -1,1 +1,0 @@
-"0","axis(1, labels = as.character(fuel_data$ï..month), at = as.numeric(fuel_data$ï..month))"
