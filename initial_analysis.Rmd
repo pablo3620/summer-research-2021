@@ -283,7 +283,7 @@ axis(1, labels = as.character(fuel_data$ï..month), at = as.numeric(fuel_data$ï
 numbers could probably put to some meaningful scale if use some scaler (L/km) like fuel efficiency of gas car then can just show kwh usage
 
 ```{r}
-temp_data = read.csv('weather data/auckland_motat_ews_data.csv',stringsAsFactors = T)
+temp_data = read.csv('weather_data/auckland_motat_ews_data.csv',stringsAsFactors = T)
 temp_data$Month = factor(temp_data$Month, levels = unique(temp_data$Month))
 head(temp_data,10)
 ```
@@ -393,7 +393,9 @@ linear model of efficiency and HDD with averages from 2017 to 2021 in Auckland
 avg_eff_HDD_auckland = data[data$year >=2017 & region == "Auckland",] %>%
   group_by(year, month) %>%
   summarise(efficiency = mean(efficiency), avg_kwh = mean(kwh))
-avg_eff_HDD_auckland$HDD = HDD_auckland$HDD
+#avg_eff_HDD_auckland$HDD = HDD_auckland$HDD
+HDD_auckland$month = as.numeric(HDD_auckland$Month)
+avg_eff_HDD_auckland = merge(avg_eff_HDD_auckland, HDD_auckland, by.x = c("year", "month"), by.y = c("Year", "month"), sort = F)
 head(avg_eff_HDD_auckland,10)
 ```
 
@@ -408,7 +410,7 @@ plot(all_lm)
 
 linear model with efficiency and HDD of individual cars from 2017 to 2021 in Auckland, categorized by type of car
 ```{r}
-auckland_model_count = data[region == "Auckland",] %>%
+auckland_model_count = data %>%
   group_by(model) %>% 
   summarise(count =  n_distinct(vehicle)) %>% 
   arrange(-count)
@@ -460,6 +462,19 @@ including model of car in model is worth it, interaction term anova says is sign
 ```{r}
 anova(all_lm,all_mdl_lm, inter_mdl_lm)
 ```
+
+```{r}
+auck_avg_temp = temp_data %>% 
+  group_by(Year, Month) %>% 
+  summarise(avg_temp = mean(Temp))
+avg_eff_HDD_auckland = merge(avg_eff_HDD_auckland, auck_avg_temp, by.x = c('year', 'Month'), by.y = c("Year", "Month"), sort = F)
+```
+```{r}
+plot(avg_eff_HDD_auckland$avg_temp,avg_eff_HDD_auckland$efficiency)
+avg_eff_HDD_auckland %>% ggplot(aes(avg_temp, efficiency)) + geom_point() + geom_smooth(method = 'loess')
+```
+
+
 
 ```{r}
 plot(avg_eff_HDD_auckland$month[avg_eff_HDD_auckland$year == 2017], avg_eff_HDD_auckland$avg_kwh[avg_eff_HDD_auckland$year == 2017],

@@ -31,7 +31,7 @@ HDD = function (data, temp = 16) {
   return(mon_sum)
 }
 
-CDD = function (data, temp = 16) {
+CDD = function (data, temp = 22) {
   mon_sum = data.frame(Year = NA, Month = NA, CDD = NA)[-1,]
   for (y in min(data$Year):max(data$Year)){
     for (m in min(data[data$Year == y,]$Month):max(data[data$Year == y,]$Month)) {
@@ -46,6 +46,12 @@ CDD = function (data, temp = 16) {
 
   return(mon_sum)
 }
+avg_temp = function(data) {
+  avg_temp = data %>% 
+    group_by(Year, Month, City) %>% 
+    summarise(avg_temp = mean(Temp))
+  return(avg_temp)
+}
 
 yearly_line = function(period = 12, count = 10) {
   for (i in 1:count) {
@@ -57,23 +63,28 @@ yearly_line = function(period = 12, count = 10) {
 
 ```{r data_setup, message = FALSE}
 month_length = c(31,28,31,30,31,30,31,31,30,31,30,31)
-weather_regions = list("Auckland" = "Auckland", "Upper Hutt" = "Wellington","Christchurch" = "Christchurch", "Dunedin" = "Coastal Otago", "Hamilton" = "Waikato", "Rotorua" = "Bay of Plenty", "Christchurch" = "North Canterbury", "Christchurch" = "South Canterbury")
+weather_regions = list("Auckland" = "Auckland", "Upper Hutt" = "Wellington","Christchurch" = "Christchurch", "Dunedin" = "Coastal Otago", "Hamilton" = "Waikato", "Rotorua" = "Bay of Plenty","Christchurch" = "Mid Canterbury", "Christchurch" = "North Canterbury", "Christchurch" = "South Canterbury", "Clyde" = "Central Otago", "Nelson" = "Nelson", "Auckland" = "Whangarei", "Auckland" = "Far North", "Upper Hutt" = "Wairarapa", "Auckland" = "Rodney", "Dunedin" = "Waitaki", "Nelson" = "Golden Bay",  "Auckland" = "Coromandel", "Palmerston North" = "Manawatu")
+
 
 
 #main EV data
 EV_data = read.csv('../Ftf Efficiency Dataset/ftf_ev_efficiency_distance_models_20211006_v1.0.csv', stringsAsFactors = T)[-1]
-EV_data$weather_region = names(weather_regions)[match(EV_data$region,  weather_regions)]
+EV_data$weather_region = as.factor(names(weather_regions)[match(EV_data$region,  weather_regions)])
 
-attach(EV_data)
+#sort factor by popularity
+region_pop = EV_data %>%
+  group_by(weather_region) %>% 
+  summarise(count =  n_distinct(vehicle)) %>% 
+  arrange(-count)
+model_pop = EV_data %>%
+  group_by(model) %>% 
+  summarise(count =  n_distinct(vehicle)) %>% 
+  arrange(-count)
+EV_data$weather_region = factor(EV_data$weather_region, levels = region_pop$weather_region)
+EV_data$model = factor(EV_data$model, levels = model_pop$model)
 
-
-
-#EV data with columns averaged by month
-monthly_EV_data = EV_data[year >= 2017,] %>% 
-  group_by(year, month) %>% 
-  summarise(mean_kwh = mean(kwh), mean_dist = mean(distance), median_kwh = median(kwh), median_dist = median(distance), mean_ef = mean(efficiency))
-monthly_EV_data$m = 1:nrow(monthly_EV_data)
-
+#remove PHEV
+EV_data = EV_data[EV_data$model != "Mitsubishi Outlander" & EV_data$model != "Toyota Prius" & EV_data$model != "Mini Countryman PHEV", ]
 
 
 #weather data
@@ -93,17 +104,78 @@ hamilton_weather$Month = match(hamilton_weather$Month, month.abb)
 #use rotorua for bay of plenty
 rotorua_weather = read.csv('weather_data/rotorua_ews_data.csv', na.strings = "-", stringsAsFactors = T)
 rotorua_weather$Month = match(rotorua_weather$Month, month.abb)
+#use clyde for central Otago
+clyde_weather = read.csv('weather_data/clyde_ews_data.csv', na.strings = "-", stringsAsFactors = T)
+clyde_weather$Month = match(clyde_weather$Month, month.abb)
+nelson_weather = read.csv('weather_data/nelson_ews_data.csv', na.strings = "-", stringsAsFactors = T)
+nelson_weather$Month = match(nelson_weather$Month, month.abb)
+#use palmerston north for Manawatu
+palmerston_weather = read.csv('weather_data/palmerston_north_ews_data.csv', na.strings = "-", stringsAsFactors = T)
+palmerston_weather$Month = match(palmerston_weather$Month, month.abb)
 
-heating_degree_days = Reduce(rbind, list(HDD(auckland_weather), HDD(upperhutt_weather), HDD(christchurch_weather),
-                HDD(dunedin_weather), HDD(hamilton_weather), HDD(rotorua_weather)))
+#temp calculations
+HDD_data = Reduce(rbind, list(HDD(auckland_weather), HDD(upperhutt_weather), HDD(christchurch_weather),
+                HDD(dunedin_weather), HDD(hamilton_weather), HDD(rotorua_weather), HDD(clyde_weather),
+                HDD(nelson_weather), HDD(palmerston_weather)))
+CDD_data = Reduce(rbind, list(CDD(auckland_weather), CDD(upperhutt_weather), CDD(christchurch_weather),
+                CDD(dunedin_weather), CDD(hamilton_weather), CDD(rotorua_weather), CDD(clyde_weather),
+                CDD(nelson_weather), CDD(palmerston_weather)))
+avg_temp_data = Reduce(rbind, list(avg_temp(auckland_weather), avg_temp(upperhutt_weather), avg_temp(christchurch_weather),
+                avg_temp(dunedin_weather), avg_temp(hamilton_weather), avg_temp(rotorua_weather), avg_temp(clyde_weather),
+                avg_temp(nelson_weather), avg_temp(palmerston_weather)))
+
+EV_data = merge(EV_data, HDD_data, by.x = c("year", "month", "weather_region"), by.y = c("Year", "Month", "City"), all.x = T)
+EV_data = merge(EV_data, CDD_data, by.x = c("year", "month", "weather_region"), by.y = c("Year", "Month", "City"), all.x = T)
+EV_data = merge(EV_data, avg_temp_data, by.x = c("year", "month", "weather_region"), by.y = c("Year", "Month", "City"), all.x = T)
+
+attach(EV_data)
+
+
+
+#EV data with columns averaged by month
+monthly_EV_data = EV_data[year >= 2017,] %>% 
+  group_by(year, month) %>% 
+  summarise(mean_kwh = mean(kwh), mean_dist = mean(distance), mean_ef = mean(efficiency))
+monthly_EV_data$m = 1:nrow(monthly_EV_data)
+
+#EV data with columns averaged by month and weather region
+monthly_reg_EV_data = EV_data[year >= 2017,] %>% 
+  na.omit() %>% 
+  group_by(year, month, weather_region) %>% 
+  summarise(mean_kwh = mean(kwh), mean_dist = mean(distance), mean_ef = mean(efficiency),
+            HDD = mean(HDD), CDD = mean(CDD), avg_temp = mean(avg_temp))
+
+
+
+#card transactions at fuel stations
+card_fuel = read.csv("Downloaded stats/fuel_usage_card_transactions_data.csv", header = T)
+
+#fuel cost data
+fuel_cost = read.csv("Downloaded stats/MBIE_weekly_fuel_cost.csv")
+fuel_cost$Week_ending_Friday = as.Date(fuel_cost$Week_ending_Friday)
+fuel_cost$year = as.numeric(format(fuel_cost$Week_ending_Friday, '%Y'))
+fuel_cost$month = as.numeric(format(fuel_cost$Week_ending_Friday, '%m'))
+month_fuel_cost = fuel_cost %>% 
+  group_by(year, month) %>% 
+  summarise(petrol = mean(Regular_Petrol_discounted_retail_price_NZc.p.l/100), diesel = mean(Diesel_discounted_retail_price_NZc.p.l/100),
+            Premium = mean(Premium_Petrol_95R_discounted_retail_price_NZc.p.l/100))
+card_fuel = merge(card_fuel, month_fuel_cost, by = c("year", "month"), sort = FALSE)
+card_fuel = card_fuel[card_fuel$year != 2004,]
+card_fuel_bl = card_fuel[card_fuel$year <= 2019,]
+fuel_cost = NULL
+month_fuel_cost = NULL
 
 ```
 
-```{r}
+```{r regions,message = FALSE}
 EV_data %>%
   group_by(region, weather_region) %>% 
   summarise(count =  n_distinct(vehicle)) %>% 
   arrange(-count)
+
+```
+```{r}
+model_pop
 ```
 
 
@@ -151,5 +223,77 @@ points(1:12, scale(c(0,monthly_eff_qm_log$coefficients[paste("factor(month)", 2:
        type = 'l', col = "red")
 axis(1, labels = month.name, at = 1:12, las = 3)
 legend("top", legend = c("Seasonal compontent Decompostion", 'Seasonal compontent of linear model'), lty = 1, col = 1:2)
+```
+will only do for Auckland as too many lines would get crowded
+
+```{r}
+auck_eff_series = ts(monthly_reg_EV_data$mean_ef[which(monthly_reg_EV_data$weather_region == "Auckland")], frequency = 12)
+decomp_auck_eff = decompose(auck_eff_series,"additive")
+auck_HDD_series = ts(HDD_data$HDD[HDD_data$City == "Auckland"], frequency = 12)
+decomp_auck_HDD = decompose(auck_HDD_series,"additive")
+
+par(mar = c(4, 4, 2, 4))
+plot(decomp_auck_eff$figure, type = 'b', main = "Auckland Seasonal Compontent Decompostions", xaxt = "n",
+     xlab = "", ylab = "Change in efficiency (km/kWh)")
+axis(1, labels = month.abb, at = 1:12, las = 3)
+
+par(new=TRUE)
+plot(decomp_auck_HDD$figure/month_length, type = 'b', col = 2, xlab="", ylab="",axes=FALSE)
+mtext("Average Heating Degree (° Days per Day) (Base temp 16°C)",side=4,line=2, cex = 1) 
+axis(4)
+
+legend("topright", legend = c("EV efficiency", "HDD"), lty = 1, col = 1:2)
+```
+
+intercept base line is Nissan Leaf (24 kWh) 2013-2016
+```{r}
+eff_lm = lm(efficiency ~ HDD + model, data = EV_data[year >=2017,], na.action=na.omit)
+summary(eff_lm)
+```
+different city weather stations may be measuring colder or warmer regions of the city and therefore may need a slightly different scaling. interesting that Rotorua has lower effect on HDD, could be cause Rotorua is inland Bay of Plenty so its temperature change is more significant that coastal Tauranga which would also be included in bay of plenty.
+```{r}
+eff_reg_lm = lm(efficiency ~ HDD+weather_region + model, data = EV_data[year >=2017,], na.action=na.omit)
+summary(eff_reg_lm)
+```
+
+https://www.geotab.com/blog/ev-range/
+
+based on this AC should also decrease range. not too obvious in NZ as is kind of cold but in Auckland can see such a trend
+what if we include cooling degree days in analysis too? unlike this direct avgerage temp vs effiency plot this would allow for cooling and heating in the same month that could reduce effiency. could expalin the couple month that have very bad effiency, possibley have a few cold and warm days but average is nothing unsual 
+
+```{r}
+monthly_reg_EV_data[monthly_reg_EV_data$weather_region == "Auckland",] %>% ggplot(aes(avg_temp, mean_ef)) + geom_point() + geom_smooth(method = 'loess')
+```
+
+```{r}
+eff_h_c_lm = lm(efficiency ~ CDD+HDD+weather_region + model, data = EV_data[year >=2017,], na.action=na.omit)
+summary(eff_h_c_lm)
+```
+
+
+```{r lm_plots, fig.show='hide'}
+plot(eff_lm)
+plot(eff_reg_lm)
+plot(eff_h_c_lm)
+```
+cooling degree days does explain extra variance but not much. likely as not many cooling days above 20 in nz
+```{r}
+anova(eff_lm, eff_reg_lm, eff_h_c_lm)
+```
+
+```{r fuel_decomp, warning=FALSE}
+fuel_pur_series = ts((card_fuel$fuel_purchased/card_fuel$petrol)/month_length, frequency = 12)
+decomp_fuel_pur = decompose(fuel_pur_series,"additive")
+plot(decomp_fuel_pur)
+yearly_line(period = 1, count = 20)
+```
+
+
+```{r}
+
+plot(decomp_fuel_pur$figure, type = 'l', main = "Seasonal compontent of Fuel purchases", xaxt = "n",
+     xlab = "", ylab = "Change in Fuel purchases (million L/day)")
+axis(1, labels = month.name, at = 1:12, las = 3)
+
 ```
 

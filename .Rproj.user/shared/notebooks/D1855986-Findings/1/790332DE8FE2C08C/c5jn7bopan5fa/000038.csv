@@ -1,0 +1,1 @@
+"0","plot(monthly_EV_data$m, monthly_EV_data$mean_ef, type = 'l', xaxt = ""n"", xlab = """", ylab = ""Mean efficiency of EVs (km/kWh)"", main = ""Time series of EV efficiencies"")"

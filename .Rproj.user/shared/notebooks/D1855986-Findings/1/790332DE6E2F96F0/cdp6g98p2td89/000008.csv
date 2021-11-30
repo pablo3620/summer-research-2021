@@ -1,0 +1,3 @@
+"0",""
+"0","plot(decomp_fuel_pur$figure, type = 'l', main = ""Seasonal compontent of Efficiency of EV"", xaxt = ""n"","
+"0","     xlab = """", ylab = ""Change in efficiency (km/kWh)"")"

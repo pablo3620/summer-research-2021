@@ -1,0 +1,1 @@
+"0","lines(monthly_EV_data$m, predict(monthly_eff_qm_log), col = 'red', lty = 2)"

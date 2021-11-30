@@ -1,0 +1,3 @@
+"0","fuel_pur_series = ts((card_fuel$fuel_purchased/card_fuel$petrol)/month_length, frequency = 12)"
+"0","decomp_fuel_pur = decompose(fuel_pur_series,""additive"")"
+"0","plot(decomp_fuel_pur)"

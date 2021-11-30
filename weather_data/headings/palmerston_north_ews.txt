@@ -1,0 +1,16 @@
+Station information:
+Name,Agent Number,Network Number,Latitude (dec.deg),Longitude (dec.deg),Height (m),Posn_Precision,Observing Authority
+Palmerston North Ews,21963,E0536D,-40.38195,175.60915,21,H,Niwa/Agresearch
+Note: Position precision types are: "W" = based on whole minutes, "T" = estimated to tenth minute,
+"G" = derived from gridref , "E" = error cases derived from gridref,
+"H" = based on GPS readings (NZGD49), "D" = by definition i.e. grid points.
+
+ScreenObs: Hourly
+
+
+UserName is = pablopaulsen
+Total number of rows output = 34694
+Number of rows remaining in subscription = 1581388
+Copyright NIWA 2021 Subject to NIWA's Terms and Conditions
+See: http://wellweblogic.niwa.co.nz:7772/pls/niwp/doc/terms.html
+Comments to: cliflo@niwa.co.nz

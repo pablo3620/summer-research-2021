@@ -1,0 +1,4 @@
+"0","fuel_pur_series = ts((card_fuel$fuel_purchased/card_fuel$petrol)/month_length, frequency = 12)"
+"2","Error in ts((card_fuel$fuel_purchased/card_fuel$petrol)/month_length,  : 
+  'ts' object must have one or more observations
+"

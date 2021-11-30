@@ -1,0 +1,3 @@
+"0","#decomp_eff = decompose(eff_series, ""multiplicative"")"
+"0","decomp_eff = decompose(eff_series,""additive"")"
+"0","plot(decomp_eff)"

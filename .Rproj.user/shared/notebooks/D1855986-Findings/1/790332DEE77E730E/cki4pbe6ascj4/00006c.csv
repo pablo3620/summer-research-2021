@@ -1,0 +1,2 @@
+"0","points(1:12, scale(c(0,monthly_eff_qm_log$coefficients[paste(""factor(month)"", 2:12, sep = """")]),scale = F),"
+"0","       type = 'l', col = ""red"")"
