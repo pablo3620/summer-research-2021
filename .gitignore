@@ -4,3 +4,5 @@
 *.ini
 ~$*
 .Rproj.user
+.Rhistory
+.RData
