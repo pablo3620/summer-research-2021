@@ -63,7 +63,8 @@ yearly_line = function(period = 12, count = 10) {
 
 ```{r data_setup, message = FALSE}
 month_length = c(31,28,31,30,31,30,31,31,30,31,30,31)
-weather_regions = list("Auckland" = "Auckland", "Upper Hutt" = "Wellington","Christchurch" = "Christchurch", "Dunedin" = "Coastal Otago", "Hamilton" = "Waikato", "Rotorua" = "Bay of Plenty","Christchurch" = "Mid Canterbury", "Christchurch" = "North Canterbury", "Christchurch" = "South Canterbury", "Clyde" = "Central Otago", "Nelson" = "Nelson", "Auckland" = "Whangarei", "Auckland" = "Far North", "Upper Hutt" = "Wairarapa", "Auckland" = "Rodney", "Dunedin" = "Waitaki", "Nelson" = "Golden Bay",  "Auckland" = "Coromandel", "Palmerston North" = "Manawatu")
+#list index (first) is the location weather to use and value (second) is the region in the data 
+weather_regions = list("Auckland" = "Auckland", "Upper Hutt" = "Wellington","Christchurch" = "Christchurch", "Dunedin" = "Coastal Otago", "Hamilton" = "Waikato", "Rotorua" = "Bay of Plenty","Christchurch" = "Mid Canterbury", "Christchurch" = "North Canterbury", "Christchurch" = "South Canterbury", "Clyde" = "Central Otago", "Nelson" = "Nelson", "Auckland" = "Whangarei", "Auckland" = "Far North", "Upper Hutt" = "Wairarapa", "Auckland" = "Rodney", "Dunedin" = "Waitaki", "Nelson" = "Golden Bay",  "Auckland" = "Coromandel", "Palmerston North" = "Manawatu", "Nelson" = "Marlborough", "Stratford" = "Taranaki", "Napier" = "Hawkes Bay", "Invercargill" = "Southland")
 
 
 
@@ -112,17 +113,29 @@ nelson_weather$Month = match(nelson_weather$Month, month.abb)
 #use palmerston north for Manawatu
 palmerston_weather = read.csv('weather_data/palmerston_north_ews_data.csv', na.strings = "-", stringsAsFactors = T)
 palmerston_weather$Month = match(palmerston_weather$Month, month.abb)
+#use stratford for Taranaki
+stratford_weather = read.csv('weather_data/stratford_ews_data.csv', na.strings = "-", stringsAsFactors = T)
+stratford_weather$Month = match(stratford_weather$Month, month.abb)
+#use napier for Hawkes Bay
+napier_weather = read.csv('weather_data/napier_ews_data.csv', na.strings = "-", stringsAsFactors = T)
+napier_weather$Month = match(napier_weather$Month, month.abb)
+#use invercargill for southland
+invercargill_weather = read.csv('weather_data/invercargill_ews_data.csv', na.strings = "-", stringsAsFactors = T)
+invercargill_weather$Month = match(invercargill_weather$Month, month.abb)
 
 #temp calculations
 HDD_data = Reduce(rbind, list(HDD(auckland_weather), HDD(upperhutt_weather), HDD(christchurch_weather),
                 HDD(dunedin_weather), HDD(hamilton_weather), HDD(rotorua_weather), HDD(clyde_weather),
-                HDD(nelson_weather), HDD(palmerston_weather)))
+                HDD(nelson_weather), HDD(palmerston_weather), HDD(stratford_weather), HDD(napier_weather),
+                HDD(invercargill_weather)))
 CDD_data = Reduce(rbind, list(CDD(auckland_weather), CDD(upperhutt_weather), CDD(christchurch_weather),
                 CDD(dunedin_weather), CDD(hamilton_weather), CDD(rotorua_weather), CDD(clyde_weather),
-                CDD(nelson_weather), CDD(palmerston_weather)))
+                CDD(nelson_weather), CDD(palmerston_weather), CDD(stratford_weather), CDD(napier_weather),
+                CDD(invercargill_weather)))
 avg_temp_data = Reduce(rbind, list(avg_temp(auckland_weather), avg_temp(upperhutt_weather), avg_temp(christchurch_weather),
                 avg_temp(dunedin_weather), avg_temp(hamilton_weather), avg_temp(rotorua_weather), avg_temp(clyde_weather),
-                avg_temp(nelson_weather), avg_temp(palmerston_weather)))
+                avg_temp(nelson_weather), avg_temp(palmerston_weather), avg_temp(stratford_weather), avg_temp(napier_weather),
+                avg_temp(invercargill_weather)))
 
 EV_data = merge(EV_data, HDD_data, by.x = c("year", "month", "weather_region"), by.y = c("Year", "Month", "City"), all.x = T)
 EV_data = merge(EV_data, CDD_data, by.x = c("year", "month", "weather_region"), by.y = c("Year", "Month", "City"), all.x = T)
