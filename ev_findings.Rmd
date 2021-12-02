@@ -1,5 +1,5 @@
 ---
-title: "Useful findings"
+title: "EV data findings"
 author: "pablo paulsen"
 date: "23/11/2021"
 output: pdf_document
@@ -158,26 +158,6 @@ monthly_reg_EV_data = EV_data[year >= 2017,] %>%
   summarise(mean_kwh = mean(kwh), mean_dist = mean(distance), mean_ef = mean(efficiency),
             HDD = mean(HDD), CDD = mean(CDD), avg_temp = mean(avg_temp))
 
-
-
-#card transactions at fuel stations
-card_fuel = read.csv("Downloaded stats/fuel_usage_card_transactions_data.csv", header = T)
-
-#fuel cost data
-fuel_cost = read.csv("Downloaded stats/MBIE_weekly_fuel_cost.csv")
-fuel_cost$Week_ending_Friday = as.Date(fuel_cost$Week_ending_Friday)
-fuel_cost$year = as.numeric(format(fuel_cost$Week_ending_Friday, '%Y'))
-fuel_cost$month = as.numeric(format(fuel_cost$Week_ending_Friday, '%m'))
-month_fuel_cost = fuel_cost %>% 
-  group_by(year, month) %>% 
-  summarise(petrol = mean(Regular_Petrol_discounted_retail_price_NZc.p.l/100), diesel = mean(Diesel_discounted_retail_price_NZc.p.l/100),
-            Premium = mean(Premium_Petrol_95R_discounted_retail_price_NZc.p.l/100))
-card_fuel = merge(card_fuel, month_fuel_cost, by = c("year", "month"), sort = FALSE)
-card_fuel = card_fuel[card_fuel$year != 2004,]
-card_fuel_bl = card_fuel[card_fuel$year <= 2019,]
-fuel_cost = NULL
-month_fuel_cost = NULL
-
 ```
 
 ```{r regions,message = FALSE}
@@ -239,11 +219,11 @@ legend("top", legend = c("Seasonal compontent Decompostion", 'Seasonal componten
 ```
 will only do for Auckland as too many lines would get crowded
 
-```{r}
+```{r eff_HDD_plot, warning=FALSE}
 auck_eff_series = ts(monthly_reg_EV_data$mean_ef[which(monthly_reg_EV_data$weather_region == "Auckland")], frequency = 12)
-decomp_auck_eff = decompose(auck_eff_series,"additive")
-auck_HDD_series = ts(HDD_data$HDD[HDD_data$City == "Auckland"], frequency = 12)
-decomp_auck_HDD = decompose(auck_HDD_series,"additive")
+decomp_auck_eff = decompose(auck_eff_series,"multiplicative")
+auck_HDD_series = ts(monthly_reg_EV_data$HDD[monthly_reg_EV_data$weather_region == "Auckland"]/month_length, frequency = 12)
+decomp_auck_HDD = decompose(auck_HDD_series,"multiplicative")
 
 par(mar = c(4, 4, 2, 4))
 plot(decomp_auck_eff$figure, type = 'b', main = "Auckland Seasonal Compontent Decompostions", xaxt = "n",
@@ -251,7 +231,7 @@ plot(decomp_auck_eff$figure, type = 'b', main = "Auckland Seasonal Compontent De
 axis(1, labels = month.abb, at = 1:12, las = 3)
 
 par(new=TRUE)
-plot(decomp_auck_HDD$figure/month_length, type = 'b', col = 2, xlab="", ylab="",axes=FALSE)
+plot(decomp_auck_HDD$figure, type = 'b', col = 2, xlab="", ylab="",axes=FALSE)
 mtext("Average Heating Degree (° Days per Day) (Base temp 16°C)",side=4,line=2, cex = 1) 
 axis(4)
 
@@ -294,19 +274,4 @@ cooling degree days does explain extra variance but not much. likely as not many
 anova(eff_lm, eff_reg_lm, eff_h_c_lm)
 ```
 
-```{r fuel_decomp, warning=FALSE}
-fuel_pur_series = ts((card_fuel$fuel_purchased/card_fuel$petrol)/month_length, frequency = 12)
-decomp_fuel_pur = decompose(fuel_pur_series,"additive")
-plot(decomp_fuel_pur)
-yearly_line(period = 1, count = 20)
-```
-
-
-```{r}
-
-plot(decomp_fuel_pur$figure, type = 'l', main = "Seasonal compontent of Fuel purchases", xaxt = "n",
-     xlab = "", ylab = "Change in Fuel purchases (million L/day)")
-axis(1, labels = month.name, at = 1:12, las = 3)
-
-```
 

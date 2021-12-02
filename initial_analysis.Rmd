@@ -23,6 +23,11 @@ data = read.csv('../Ftf Efficiency Dataset/ftf_ev_efficiency_distance_models_202
 attach(data)
 month_length = c(31,28,31,30,31,30,31,31,30,31,30,31)
 head(data)
+yearly_line = function(period = 12, count = 10) {
+  for (i in 1:count) {
+    abline(v = i*period, lty = 3)
+  }
+}
 
 ```
 
@@ -132,10 +137,12 @@ anova(monthly_eff_lm, monthly_eff_lm_log, monthly_eff_qm, monthly_eff_qm_log)
 
 ```{r}
 par(mar = c(5, 4, 2, 1))
-plot(monthly_data$m, monthly_data$mean_ef, type = 'l', xaxt = "n", xlab = "", ylab = "Mean effiency of EVs", main = "Time series of EV efficiencies")
-lines(monthly_data$m, predict(monthly_eff_qm_log), col = 'red')
+plot(monthly_data$m, monthly_data$mean_ef, type = 'l', xaxt = "n", xlab = "", ylab = "Mean efficiency of EVs (km/kWh)", main = "Time series of EV efficiencies")
+lines(monthly_data$m, predict(monthly_eff_qm_log), col = 'red', lty = 2)
 
+yearly_line()
 axis(1,labels = paste(monthly_data$year, monthly_data$month, sep = "-"), at = monthly_data$m, las = 2,srt = 35)
+legend("topleft", legend = c("Actual mean EV efficiency", "Modelled prediction EV efficiency"), lty = 1:2, col = 1:2)
 
 ```
 
@@ -149,6 +156,8 @@ points(monthly_data$m, residuals(monthly_eff_qm_log), type = 'l', col = "darkgre
 
 abline(h= 0)
 ```
+
+
 ```{r}
 eff_series = ts(monthly_data$mean_ef, frequency = 12)
 adf.test(eff_series, alternative = "stationary")
@@ -161,6 +170,7 @@ we can reject null hypothesis that data is not-stationary. this makes sense as a
 decomp_eff = decompose(eff_series, "multiplicative")
 plot(decomp_eff)
 ```
+
 ```{r}
 plot(decomp_eff$seasonal)
 ```
@@ -624,10 +634,10 @@ linear model to try to model kWh used by number of HDD in the month is effective
 only thing that can be seen is the cars that are driven more or less each month
 
 ```{r}
-card_fuel = read.csv("Downloaded stats/fuel_usage_card_transactions_data.csv", header = T)
+card_fuel = read.csv("downloaded_stats/fuel_usage_card_transactions_data.csv", header = T)
 head(card_fuel)
 
-fuel_cost = read.csv("Downloaded stats/MBIE_weekly_fuel_cost.csv")
+fuel_cost = read.csv("downloaded_stats/MBIE_weekly_fuel_cost.csv")
 fuel_cost$Week_ending_Friday = as.Date(fuel_cost$Week_ending_Friday)
 fuel_cost$year = as.numeric(format(fuel_cost$Week_ending_Friday, '%Y'))
 fuel_cost$month = as.numeric(format(fuel_cost$Week_ending_Friday, '%m'))
