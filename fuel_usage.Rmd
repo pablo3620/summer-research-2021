@@ -6,7 +6,7 @@ output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = F)
+knitr::opts_chunk$set(echo = T)
 knitr::opts_chunk$set(fig.width=9, fig.height=5) 
 library(dplyr)
 library(ggplot2)
@@ -14,14 +14,15 @@ library(tidyr)
 library(quantmod)
 library(forecast)
 library(tseries)
-library(zoo)
+library(stringr)
+
 ```
 
 ```{r functions}
 
 yearly_line = function(period = 12, count = 10) {
-  for (i in 1:count) {
-    abline(v = i*period, lty = 3)
+  for (i in 0:count) {
+    abline(v = i*period+1, lty = 3)
   }
 }
 ```
@@ -61,6 +62,18 @@ monthly_fuel_trade = fuel_trade[rep(seq_len(nrow(fuel_trade)), each = 3), ]
 monthly_fuel_trade$month = rep(1:12, length.out = nrow(monthly_fuel_trade))
 monthly_fuel_trade[,c("Petrol", "Regular.Petrol", "Premium.Petrol","Diesel")] = monthly_fuel_trade[,c("Petrol", "Regular.Petrol", "Premium.Petrol","Diesel")]/3
 
+#estimate the montly cost of trade fuel to compare to credit card transactions
+monthly_trade_cost = monthly_fuel_trade[monthly_fuel_trade$year >= 2005, c("year", "month", "Regular.Petrol","Premium.Petrol", "Diesel")]
+monthly_trade_cost = merge(monthly_trade_cost, month_fuel_cost, by = c("year", "month"), sort = FALSE)
+monthly_trade_cost$diesel_total_cost = monthly_trade_cost$Diesel * monthly_trade_cost$diesel_cost
+monthly_trade_cost$petrol_total_cost = monthly_trade_cost$Regular.Petrol*monthly_trade_cost$petrol_cost +
+                                monthly_trade_cost$Premium.Petrol*monthly_trade_cost$premium_cost
+monthly_trade_cost$est_total_cost = monthly_trade_cost$diesel_total_cost + monthly_trade_cost$petrol_total_cost
+
+regional_fuel_sales = read.csv("downloaded_stats/regional_fuel_sales.csv", header = T)
+regional_fuel_sales$quat = as.numeric(str_sub(regional_fuel_sales$Quarter, -1))
+
+                                
 ```
 
 
@@ -73,7 +86,7 @@ yearly_line(period = 1, count = 20)
 
 
 ```{r}
-plot(decomp_fuel_pur$figure, type = 'l', main = "Seasonal compontent of Fuel purchases", xaxt = "n",
+plot(decomp_fuel_pur$figure, type = 'l', main = "Seasonal component of Fuel purchases", xaxt = "n",
      xlab = "", ylab = "Change in Fuel purchases from baseline")
 axis(1, labels = month.name, at = 1:12, las = 3)
 ```
@@ -85,16 +98,29 @@ plot(decomp_fuel_pur)
 yearly_line(period = 1, count = 20)
 ```
 ```{r}
-fuel_trade_cost_series = ts(monthly_fuel_trade$Petrol, frequency = 12)
+fuel_trade_cost_series = ts(monthly_trade_cost$est_total_cost, frequency = 12)
 decomp_fuel_trade_cost = decompose(fuel_trade_cost_series, "multiplicative")
 plot(decomp_fuel_trade_cost)
 yearly_line(period = 1, count = 50)
 ```
 
 ```{r}
-plot(decomp_fuel_trade_cost$figure, type = 'l', main = "Seasonal compontent of Fuel purchases", xaxt = "n",
+plot(decomp_fuel_trade_cost$figure, type = 'l', main = "Seasonal component of Fuel purchases", xaxt = "n",
      xlab = "", ylab = "Change in Fuel purchases")
-points(decomp_fuel_pur$figure, type = 'l')
+points(decomp_fuel_pur$figure, type = 'l', col = "red")
+legend("bottomright", legend = c("quaterly data cost estimate", "monthly card purchases"), col = 1:2, lty = 1)
 axis(1, labels = month.name, at = 1:12, las = 3)
 ```
+plot uses quarterly fuel sales averaged out to 3 month and then the monthly price of fuel and compares it to the card sales of fuel
+```{r}
+plot(monthly_trade_cost$est_total_cost/1e6,type = 'l', ylim = c(min(card_fuel$fuel_purchased), max(monthly_trade_cost$est_total_cost/1e6)), xaxt = "n", xlab = "", ylab = "Fuel purchases (Million $)",
+     main = "Fuel Purchases")
+points(card_fuel$fuel_purchased, type = 'l', col = 2)
+points(regional_fuel_sales$Total, type = 'l', col = 3)
+yearly_line(count = 20)
+axis(1, labels = 2005:2021, at = c(0,1:16)*12+1, las = 3)
+legend("topleft", legend = c("quaterly data cost estimate", "monthly card purchases"), col = 1:2, lty = 1)
+```
+
+
 

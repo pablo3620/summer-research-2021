@@ -54,8 +54,8 @@ avg_temp = function(data) {
 }
 
 yearly_line = function(period = 12, count = 10) {
-  for (i in 1:count) {
-    abline(v = i*period, lty = 3)
+  for (i in 0:count) {
+    abline(v = i*period+1, lty = 3)
   }
 }
 ```
@@ -210,7 +210,7 @@ yearly_line(period = 1)
 ```
 
 ```{r}
-plot(decomp_eff$figure, type = 'l', main = "Seasonal compontent of Efficiency of EV", xaxt = "n",
+plot(decomp_eff$figure, type = 'l', main = "Seasonal component of Efficiency of EV", xaxt = "n",
      xlab = "", ylab = "Change in efficiency (km/kWh)")
 points(1:12, scale(c(0,monthly_eff_qm_log$coefficients[paste("factor(month)", 2:12, sep = "")]),scale = F),
        type = 'l', col = "red")
@@ -226,7 +226,7 @@ auck_HDD_series = ts(monthly_reg_EV_data$HDD[monthly_reg_EV_data$weather_region 
 decomp_auck_HDD = decompose(auck_HDD_series,"multiplicative")
 
 par(mar = c(4, 4, 2, 4))
-plot(decomp_auck_eff$figure, type = 'b', main = "Auckland Seasonal Compontent Decompostions", xaxt = "n",
+plot(decomp_auck_eff$figure, type = 'b', main = "Auckland Seasonal component Decompostions", xaxt = "n",
      xlab = "", ylab = "Change in efficiency (km/kWh)")
 axis(1, labels = month.abb, at = 1:12, las = 3)
 
