@@ -73,6 +73,13 @@ monthly_trade_cost$est_total_cost = monthly_trade_cost$diesel_total_cost + month
 regional_fuel_sales = read.csv("downloaded_stats/regional_fuel_sales.csv", header = T)
 regional_fuel_sales$quat = as.numeric(str_sub(regional_fuel_sales$Quarter, -1))
 
+monthly_regional_sales = regional_fuel_sales[rep(seq_len(nrow(regional_fuel_sales)), each = 3), ]
+monthly_regional_sales$month = rep(1:12, length.out = nrow(monthly_regional_sales))
+#careful as using numbers as column indexs
+monthly_regional_sales[,3:20] = monthly_regional_sales[,3:20]/3
+
+
+
                                 
 ```
 
@@ -98,7 +105,7 @@ plot(decomp_fuel_pur)
 yearly_line(period = 1, count = 20)
 ```
 ```{r}
-fuel_trade_cost_series = ts(monthly_trade_cost$est_total_cost, frequency = 12)
+fuel_trade_cost_series = ts(monthly_trade_cost$Regular.Petrol, frequency = 12)
 decomp_fuel_trade_cost = decompose(fuel_trade_cost_series, "multiplicative")
 plot(decomp_fuel_trade_cost)
 yearly_line(period = 1, count = 50)
@@ -107,7 +114,7 @@ yearly_line(period = 1, count = 50)
 ```{r}
 plot(decomp_fuel_trade_cost$figure, type = 'l', main = "Seasonal component of Fuel purchases", xaxt = "n",
      xlab = "", ylab = "Change in Fuel purchases")
-points(decomp_fuel_pur$figure, type = 'l', col = "red")
+#points(decomp_fuel_pur$figure, type = 'l', col = "red")
 legend("bottomright", legend = c("quaterly data cost estimate", "monthly card purchases"), col = 1:2, lty = 1)
 axis(1, labels = month.name, at = 1:12, las = 3)
 ```
@@ -116,10 +123,10 @@ plot uses quarterly fuel sales averaged out to 3 month and then the monthly pric
 plot(monthly_trade_cost$est_total_cost/1e6,type = 'l', ylim = c(min(card_fuel$fuel_purchased), max(monthly_trade_cost$est_total_cost/1e6)), xaxt = "n", xlab = "", ylab = "Fuel purchases (Million $)",
      main = "Fuel Purchases")
 points(card_fuel$fuel_purchased, type = 'l', col = 2)
-points(regional_fuel_sales$Total, type = 'l', col = 3)
+points(y=monthly_regional_sales$Total/1e6,x = (12*10+1):(12*10+81), type = 'l', col = 3)
 yearly_line(count = 20)
 axis(1, labels = 2005:2021, at = c(0,1:16)*12+1, las = 3)
-legend("topleft", legend = c("quaterly data cost estimate", "monthly card purchases"), col = 1:2, lty = 1)
+legend("topleft", legend = c("quaterly data cost estimate", "monthly card purchases", "regional fuel purchases"), col = 1:3, lty = 1)
 ```
 
 
