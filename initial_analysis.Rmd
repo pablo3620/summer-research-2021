@@ -51,8 +51,8 @@ data %>%
 can't really use before 2017
 ```{r}
 mean_data = list()
-for (i in 2017:2021) {
-  mean_data[[i-2016]] = data[year == i,] %>% 
+for (i in 2014:2021) {
+  mean_data[[i-2013]] = data[year == i,] %>% 
     group_by(month) %>% 
     summarise(mean_kwh = mean(kwh), mean_dist = mean(distance), median_kwh = median(kwh), median_dist = median(distance), mean_ef = mean(efficiency))
 }
@@ -60,10 +60,10 @@ for (i in 2017:2021) {
 
 
 ```{r Fig, echo=TRUE, fig.height=15, fig.width=15}
-par(mfrow=c(3,2))
-for (i in 2017:2021) {
+par(mfrow=c(4,2))
+for (i in 2014:2021) {
   par(mar = c(4, 4, 2, 4))
-  cur_year = data.frame(mean_data[[i-2016]])
+  cur_year = data.frame(mean_data[[i-2013]])
   plot(cur_year$month, cur_year$mean_kwh, type = 'b', main = i, xlab = "Month", ylab = "kWh", xlim = c(1,12),
        ylim = c(min(c(cur_year$mean_kwh,cur_year$median_kwh)),max(c(cur_year$mean_kwh,cur_year$median_kwh))))
   points(cur_year$month, cur_year$median_kwh, type = 'b', col = 2)
@@ -89,10 +89,10 @@ ggplot(data = data[year == 2018 & month == 6,], aes(x = kwh)) + geom_density(alp
 ```
 
 ```{r Fig2, echo=TRUE, fig.height=15, fig.width=15}
-par(mfrow=c(3,2))
-for (i in 2017:2021) {
+par(mfrow=c(4,2))
+for (i in 2014:2021) {
   par(mar = c(4, 4, 2, 4))
-  cur_year = data.frame(mean_data[[i-2016]])
+  cur_year = data.frame(mean_data[[i-2013]])
   plot(cur_year$month, cur_year$mean_ef, type = 'b', main = i, xlab = "Month", ylab = "kWh", xlim = c(1,12))
   points(cur_year$month, cur_year$median_kwh, type = 'b', col = 2)
 }

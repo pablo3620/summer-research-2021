@@ -1,16 +1,14 @@
 ---
 title: "Quick summary"
-author: "pablo paulsen"
+author: "Pablo Paulsen"
 date: "06/12/2021"
 output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = F)
-knitr::opts_chunk$set(fig.width=9, fig.height=5) 
-library(dplyr)
-library(ggplot2)
-library(tidyr)
+knitr::opts_chunk$set(fig.width=9, fig.height=6) 
+library(tidyverse)
 library(quantmod)
 library(forecast)
 library(tseries)
@@ -63,7 +61,7 @@ yearly_line = function(period = 12, count = 10) {
 
 Load in and set up all of the data. Data loaded in includes
 \begin{itemize}
-  \item Flip the fleet EV monitoring data with PHEVs removed. Includes monthly stats on the EV including distance traveled, efficiency and region of the vehicle
+  \item Flip the fleet EV monitoring data with PHEVs removed. Includes monthly stats on the EV including distance traveled, efficiency and region of the vehicle. also only using data from 2017 as 2015 only included data from 5 cars and by the end of 2016 only included 23 cars.
   \item Weather data from
   \begin{itemize}
     \item Auckland
@@ -80,7 +78,11 @@ Load in and set up all of the data. Data loaded in includes
   \end{itemize}
 \end{itemize}
 
-Using the weather data i
+Using the weather data I calculated the regional average temperature for the month, heating degree days and cooling degree days using base temperature of 16 and 22 respectively. Base temperature is based around what is comfortable for most people as ( https://www.geotab.com/blog/ev-range/ ) research shows that a majority of the seasonal variation in EV efficiency is due to cabin temperature control. The base temps could be changed slightly or possibly even use cross validation to find the ideal for best model fit.
+
+I then added the calculated monthly weather statistics by region to the monthly EV data based on the regions of vehicle. Assuming that vehicle stays in it own region for a majority of the time. 
+
+I also created a quick monthly average for all of NZ and also by region of the EV statistics.
 
 ```{r data_setup, message = FALSE}
 month_length = c(31,28,31,30,31,30,31,31,30,31,30,31)
@@ -183,4 +185,62 @@ monthly_reg_EV_data = EV_data[year >= 2017,] %>%
             HDD = mean(HDD), CDD = mean(CDD), avg_temp = mean(avg_temp))
 
 ```
+```{r eff_plot}
+plot(monthly_EV_data$m, monthly_EV_data$mean_ef, type = 'l', xaxt = "n", xlab = "", ylab = "Mean efficiency of EVs (km/kWh)", main = "Time series of EV efficiencies")
+axis(1,labels = paste(monthly_EV_data$year, monthly_EV_data$month, sep = "-"), at = monthly_EV_data$m, las = 2,srt = 35)
+yearly_line()
+```
+
+Plotting monthly average efficiency for all of NZ we can see that there is a very clear seasonal trend.
+
+
+Used 2 different methods or decomposition of the seasonal trend of efficiency.
+\begin{itemize}
+  \item Linear model with each month as an independent factor
+  \begin{itemize}
+    \item offers more control and flexibility (could add vehicle type etc in further analysis)
+    \item shows confidence interval
+    \item requires to define an arbitrary function that can fit to the overall trend to separate from seasonal trend
+    \item least squares is sensitive to single large deviation that could just be outlier (such as lockdown)
+  \end{itemize}
+  \item Time series Decomposition
+  \begin{itemize}
+    \item designed for time series
+    \item automatically finds a overall trend based on the period to isolate the seasonal trend from
+    \item less sensitive to a large deviation (such as lockdown) as attributed to noise compared to linear model
+    \item no confidence interval
+  \end{itemize}
+\end{itemize}
+
+In the end seems better to use Time series Decomposition for overall efficiency trend but is still useful to see from the linear model without assuming any correlation between the months it still has very strong confidence intervals (p-value $< 2^{-16}$). Could be worth doing some more in depth using linear model and modeling by car.
+
+The decomposition shows that the seasonal trend goes from 0.93 times the efficiency in June to 1.025 the average efficiency in February in March
+
+
+```{r eff_decomp_plot, message = FALSE, warning=FALSE}
+eff_series = ts(monthly_EV_data$mean_ef, frequency = 12, start = 2017)
+decomp_eff = decompose(eff_series,"multiplicative")
+#base r plot commented out
+#plot(decomp_eff)
+#yearly_line(period = 1, 2100)
+# Get the time values for the time series
+
+
+Time = attributes(eff_series)$tsp
+Time = seq(Time[1],Time[2], length.out=(Time[2]-Time[1])*Time[3])
+
+# Convert td to data frame
+dat = cbind(Time, with(decomp_eff, data.frame(Observed=x, Trend=trend, Seasonal=seasonal, Random=random)))
+
+ggplot(gather(dat, component, value, -Time), aes(Time, value)) +
+  facet_grid(component ~ ., scales="free_y") +
+  geom_line() +
+  labs(y="Efficiency", x="Year") +
+  ggtitle("Decomposition of multiplicative efficiency time series")+
+  theme(plot.title=element_text(hjust=0.5))+
+  theme_bw()
+  
+```
+
+
 
