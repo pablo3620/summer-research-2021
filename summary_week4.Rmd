@@ -3,11 +3,12 @@ title: "Quick summary"
 author: "Pablo Paulsen"
 date: "06/12/2021"
 output: pdf_document
+
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = F)
-knitr::opts_chunk$set(fig.width=9, fig.height=6) 
+knitr::opts_chunk$set(fig.width=9, fig.height=5) 
 library(tidyverse)
 library(quantmod)
 library(forecast)
@@ -78,9 +79,11 @@ Load in and set up all of the data. Data loaded in includes
   \end{itemize}
 \end{itemize}
 
-Using the weather data I calculated the regional average temperature for the month, heating degree days and cooling degree days using base temperature of 16 and 22 respectively. Base temperature is based around what is comfortable for most people as ( https://www.geotab.com/blog/ev-range/ ) research shows that a majority of the seasonal variation in EV efficiency is due to cabin temperature control. The base temps could be changed slightly or possibly even use cross validation to find the ideal for best model fit.
+Using the weather data I calculated the regional average temperature for the month, heating degree days and cooling degree days using base temperature of 16 and 22 respectively.  Base temperature is based around what is comfortable for most people as research \cite{ev_range} shows that a majority of the seasonal variation in EV efficiency is due to cabin temperature control. The base temps could be changed slightly or possibly even use cross validation to find the ideal for best model fit. 
 
-I then added the calculated monthly weather statistics by region to the monthly EV data based on the regions of vehicle. Assuming that vehicle stays in it own region for a majority of the time. 
+I then divided HDD and CDD by the length of the month so that HDD and CDD corresponds to average heating degrees days per day for the month. This is so that when comparing to other statistic such as efficiency that are averaged out rather than summed there is less bias
+
+I then added the calculated monthly weather statistics by region to the monthly EV data based on the regions of vehicle. Assuming that vehicle stays in it's own region for a majority of the time. 
 
 I also created a quick monthly average for all of NZ and also by region of the EV statistics.
 
@@ -163,6 +166,9 @@ avg_temp_data = Reduce(rbind, list(avg_temp(auckland_weather), avg_temp(upperhut
                 avg_temp(nelson_weather), avg_temp(palmerston_weather), avg_temp(stratford_weather), avg_temp(napier_weather),
                 avg_temp(invercargill_weather)))
 
+HDD_data$HDD = HDD_data$HDD/month_length
+CDD_data$CDD = CDD_data$CDD/month_length
+
 EV_data = merge(EV_data, HDD_data, by.x = c("year", "month", "weather_region"), by.y = c("Year", "Month", "City"), all.x = T)
 EV_data = merge(EV_data, CDD_data, by.x = c("year", "month", "weather_region"), by.y = c("Year", "Month", "City"), all.x = T)
 EV_data = merge(EV_data, avg_temp_data, by.x = c("year", "month", "weather_region"), by.y = c("Year", "Month", "City"), all.x = T)
@@ -191,10 +197,11 @@ axis(1,labels = paste(monthly_EV_data$year, monthly_EV_data$month, sep = "-"), a
 yearly_line()
 ```
 
+
 Plotting monthly average efficiency for all of NZ we can see that there is a very clear seasonal trend.
 
 
-Used 2 different methods or decomposition of the seasonal trend of efficiency.
+Used 2 different methods of decomposition of the seasonal trend of efficiency.
 \begin{itemize}
   \item Linear model with each month as an independent factor
   \begin{itemize}
@@ -214,10 +221,11 @@ Used 2 different methods or decomposition of the seasonal trend of efficiency.
 
 In the end seems better to use Time series Decomposition for overall efficiency trend but is still useful to see from the linear model without assuming any correlation between the months it still has very strong confidence intervals (p-value $< 2^{-16}$). Could be worth doing some more in depth using linear model and modeling by car.
 
-The decomposition shows that the seasonal trend goes from 0.93 times the efficiency in June to 1.025 the average efficiency in February in March
+The decomposition shows that the seasonal trend goes from 0.93 times the mean efficiency in June to 1.025 the mean efficiency in February and March, A difference of 10%.
 
 
-```{r eff_decomp_plot, message = FALSE, warning=FALSE}
+
+```{r eff_decomp_plot, message = FALSE, warning=FALSE, fig.height=6}
 eff_series = ts(monthly_EV_data$mean_ef, frequency = 12, start = 2017)
 decomp_eff = decompose(eff_series,"multiplicative")
 #base r plot commented out
@@ -243,4 +251,84 @@ ggplot(gather(dat, component, value, -Time), aes(Time, value)) +
 ```
 
 
+Looking at the plot below there is a very obvious seasonal trend to EV efficiency but so that I can compare it to HDD I limit this to just Auckland EVs.
 
+Within Auckland looking at the plot it is very obvious that as number of heating degree days increases the efficiency of the EV decreases. I do notice a slight dip in efficiency during Jan and Feb and it can be questioned if that is due to AC usage which would decrease range \cite{ev_range} or other factors such as holiday travel which could involve highway driving which EVs are generally less efficient at \cite{ev_highway}. This effect is not obvious in the overall trend this could be as Auckland for the most part is a warmer climate than the rest of NZ.
+
+
+```{r eff_HDD_plot, warning=FALSE}
+auck_eff_series = ts(monthly_reg_EV_data$mean_ef[which(monthly_reg_EV_data$weather_region == "Auckland")], frequency = 12)
+decomp_auck_eff = decompose(auck_eff_series,"multiplicative")
+auck_HDD_series = ts(monthly_reg_EV_data$HDD[monthly_reg_EV_data$weather_region == "Auckland"], frequency = 12)
+decomp_auck_HDD = decompose(auck_HDD_series,"multiplicative")
+
+par(mar = c(4, 4, 2, 4))
+plot(decomp_auck_eff$figure, type = 'b', main = "Auckland Seasonal component Decompostions", xaxt = "n",
+     xlab = "", ylab = "Change in efficiency")
+axis(1, labels = month.abb, at = 1:12, las = 3)
+
+par(new=TRUE)
+plot(decomp_auck_HDD$figure, type = 'b', col = 2, xlab="", ylab="",axes=FALSE)
+mtext("Average Heating Degree (° Days per Day) (Base temp 16°C)",side=4,line=2, cex = 1) 
+axis(4)
+
+legend("topright", legend = c("EV efficiency", "HDD"), lty = 1, col = 1:2)
+```
+
+Further looking into this we can see that in Auckland as the average temperature of the month starts increasing past 17.5 there appears to be a trend towards decreasing EV efficiency. As stated before research \cite{ev_range} suggested AC also decreases efficiency of the EV. This made me think what if we include cooling degree days and heating degree days in analysis? This could also be useful to explain the points well below the trend line that may be from a month where there was both cold and warm days contributing to a high usage of cabin temperature control decreasing range but average temperature would not be able to show this. 
+
+```{r temp_eff_plot, message=FALSE}
+monthly_reg_EV_data[monthly_reg_EV_data$weather_region == "Auckland",] %>%
+  ggplot(aes(avg_temp, mean_ef)) + geom_point() + geom_smooth(method = 'loess') + ggtitle("Auckland Monthly Efficiency by Temperature") + labs(y="Monthly Average Efficiency", x="Monthly Average Temperature")
+```
+
+A linear model is use to model efficiency by HDD and CDD.
+
+A different intercept is used for each model of car as a majority of the variation in efficiency will be due to different vehicle models, therefore, including the model allows for much better model fit and smaller confidence intervals. A different intercept is also used for each weather region as a weather might be measured in a cold or hot section of region and also the region may have more or less hill/highway which could influence driving patterns impacting efficiency (for simplicity preferable if not included but model is much better fit if is included). However the Gradient of HDD term and CDD term is kept same for all regions and models as it this is the number we are trying to find to see how the number of HDD and CDD effect the efficiency of the EV. A baseline of Auckland and Nissan Leaf (24 kWh) 2013-2016 are used for the region and model as there is the most amount of data in them.
+
+A linear model is used as with the correct base temperature the usage of power to warm/cool the cabin should be roughly linear to the HDD/CDD \cite{HDD_est}. Unfortunately, cars unlike houses or buildings are often only used at particular hours of the day for short period so this may break down or have more dependency towards the temperature at times such as the morning or evening commute hours. 
+
+The HDD term suggests that as the average number of heating degree days per days increases by 1 the average efficiency of EVs for the month decreases by 0.103. With a p-value of $<2\times10^{-16}$ we are quite confident on this value. 
+
+The CDD term suggests that as the average number of cooling degree days per days increases by 1 the average efficiency of EVs for the month decreases by 0.113. With a p-value of $8.61\times10^{-5}$ we are less confident on this value. This is likely as there is much less data in New Zealand regarding cooling degree days as NZ is a much cooler climate compared to where a lot of the other research on EVs is going on. 
+
+
+```{r eff_lm_model}
+eff_h_c_lm = lm(efficiency ~ HDD + CDD + weather_region + model, data = EV_data[year >=2017,], na.action=na.omit)
+summary(eff_h_c_lm)
+```
+
+
+If we know that EVs are less efficient in the winter due to heating requirements and to a much lesser extent in NZ less efficient on warm days due to AC in order to see how this will affect the grid we need to see how this correlates with NZ populations driving pattern. 
+
+Currently waiting on Haobo from NZTA for VKT estimate data which would be ideal. 
+
+For now I have 3 data sets regarding fuel usage
+\begin{itemize}
+  \item monthly card sales data 
+  \begin{itemize}
+    \item monthly data for all of NZ credit card transactions at fuel stations
+  \end{itemize}
+  \item quarterly regional fuel sales data
+  \begin{itemize}
+    \item quarterly data for all sales at fuel stations broken down by region
+  \end{itemize}
+  \item quarterly fuel trade data
+    \begin{itemize}
+    \item quarterly data of fuel used for transport by type of fuel
+  \end{itemize}
+\end{itemize}
+
+
+
+\begin{thebibliography}{9}
+\bibitem{ev_range}
+\textit{To what degree does temperature impact EV range?}
+\\\texttt{\url{https://www.geotab.com/blog/ev-range/}}
+\bibitem{ev_highway}
+\textit{Why is the range of an EV less on the freeway than the city?}
+\\\texttt{\url{https://evcentral.com.au/why-is-the-range-of-an-ev-less-on-the-freeway-than-the-city/}}
+\bibitem{HDD_est}
+\textit{Bayesian estimation of a building's base temperature for the calculation of heating degree-days}
+\\\texttt{https://www.sciencedirect.com/science/article/abs/pii/S0378778816312907}
+\end{thebibliography}

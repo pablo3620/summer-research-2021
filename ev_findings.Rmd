@@ -246,7 +246,7 @@ summary(eff_lm)
 ```
 different city weather stations may be measuring colder or warmer regions of the city and therefore may need a slightly different scaling. interesting that Rotorua has lower effect on HDD, could be cause Rotorua is inland Bay of Plenty so its temperature change is more significant that coastal Tauranga which would also be included in bay of plenty.
 ```{r}
-eff_reg_lm = lm(efficiency ~ HDD+weather_region + model, data = EV_data[year >=2017,], na.action=na.omit)
+eff_reg_lm = lm(efficiency ~ HDD+ model, data = EV_data[year >=2017,], na.action=na.omit)
 summary(eff_reg_lm)
 ```
 
@@ -260,7 +260,7 @@ monthly_reg_EV_data[monthly_reg_EV_data$weather_region == "Auckland",] %>% ggplo
 ```
 
 ```{r}
-eff_h_c_lm = lm(efficiency ~ CDD+HDD+weather_region + model, data = EV_data[year >=2017,], na.action=na.omit)
+eff_h_c_lm = lm(efficiency ~ CDD + HDD +weather_region + model, data = EV_data[year >=2017,], na.action=na.omit)
 summary(eff_h_c_lm)
 ```
 
