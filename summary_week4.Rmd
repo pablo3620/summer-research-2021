@@ -13,6 +13,7 @@ library(tidyverse)
 library(quantmod)
 library(forecast)
 library(tseries)
+library(readr)
 ```
 
 ```{r functions, include = FALSE}
@@ -59,34 +60,6 @@ yearly_line = function(period = 12, count = 10) {
 }
 ```
 
-
-Load in and set up all of the data. Data loaded in includes
-\begin{itemize}
-  \item Flip the fleet EV monitoring data with PHEVs removed. Includes monthly stats on the EV including distance traveled, efficiency and region of the vehicle. also only using data from 2017 as 2015 only included data from 5 cars and by the end of 2016 only included 23 cars.
-  \item Weather data from
-  \begin{itemize}
-    \item Auckland
-    \item Upper Hutt
-    \item Christchurch
-    \item Dunedin
-    \item Hamilton
-    \item Rotorua
-    \item Nelson
-    \item Palmerston North
-    \item Stratford
-    \item Napier
-    \item Invercargill
-  \end{itemize}
-\end{itemize}
-
-Using the weather data I calculated the regional average temperature for the month, heating degree days and cooling degree days using base temperature of 16 and 22 respectively.  Base temperature is based around what is comfortable for most people as research \cite{ev_range} shows that a majority of the seasonal variation in EV efficiency is due to cabin temperature control. The base temps could be changed slightly or possibly even use cross validation to find the ideal for best model fit. 
-
-I then divided HDD and CDD by the length of the month so that HDD and CDD corresponds to average heating degrees days per day for the month. This is so that when comparing to other statistic such as efficiency that are averaged out rather than summed there is less bias
-
-I then added the calculated monthly weather statistics by region to the monthly EV data based on the regions of vehicle. Assuming that vehicle stays in it's own region for a majority of the time. 
-
-I also created a quick monthly average for all of NZ and also by region of the EV statistics.
-
 ```{r data_setup, message = FALSE}
 month_length = c(31,28,31,30,31,30,31,31,30,31,30,31)
 #list index (first) is the location weather to use and value (second) is the region in the data 
@@ -95,7 +68,7 @@ weather_regions = list("Auckland" = "Auckland", "Upper Hutt" = "Wellington","Chr
 
 
 #main EV data
-EV_data = read.csv('../Ftf Efficiency Dataset/ftf_ev_efficiency_distance_models_20211006_v1.0.csv', stringsAsFactors = T)[-1]
+EV_data = read_csv("Ftf Efficiency Dataset/ftf_ev_efficiency_distance_models_20211006_v1.0.csv")[-1]
 EV_data$weather_region = as.factor(names(weather_regions)[match(EV_data$region,  weather_regions)])
 
 #sort factor by popularity
@@ -114,7 +87,6 @@ rm(model_pop)
 
 #remove PHEV
 EV_data = EV_data[EV_data$model != "Mitsubishi Outlander" & EV_data$model != "Toyota Prius" & EV_data$model != "Mini Countryman PHEV", ]
-
 
 
 #weather data
@@ -191,6 +163,27 @@ monthly_reg_EV_data = EV_data[year >= 2017,] %>%
             HDD = mean(HDD), CDD = mean(CDD), avg_temp = mean(avg_temp))
 
 ```
+
+## Introduction
+
+This projects aims to understand how current seasonal trends in driving behaviour coupled with seasonal differences in the driving efficiency of elecric vehicles (EVs) will impact New Zealand's electricity grid under a future scenario where light vehicles are largely electrified. 
+
+## Methodology
+
+A variety of data sources were used. Distance traveled and vehicle efficiency (km/kWh) by month, as well as the region of the vehicle was collected from the onboard computers of `r length(unique(EV_data$vehicle))` vehicles between `r min(EV_data$year)` and `r max(EV_data$year)` as part of the 'Flip the Fleet' project.
+
+Weather data was then collected from `r length(unique(names(weather_regions)))` regions around New Zealand that best correspond to the regions of the vehicles. 
+
+Using the regional average temperatures, monthly heating degree days and cooling degree days were imputed using base temperatures of 16$^\circ$C and 22$^\circ$C respectively.  The base temperatures were selected to represent the range of comfortable temperatures for most people, as research \cite{ev_range} shows that a majority of the seasonal variation in EV efficiency is due to cabin temperature control. The base temperatures could be changed slightly or possibly even use cross validation to find the ideal for best model fit. 
+
+The HDD and CDD was then divided by the length of the month so that HDD and CDD corresponds to average heating degrees days per day for the month. This is so that when comparing to other statistic such as efficiency that are averaged out rather than summed there is less bias
+
+The calculated monthly weather statistics by region was then added to the monthly EV data based on the regions of vehicle. This assumes that vehicle stays in it's own region for a majority of the time. 
+
+A monthly average was then created for all of NZ and also by region of the EV statistics.
+
+## Results
+
 ```{r eff_plot}
 plot(monthly_EV_data$m, monthly_EV_data$mean_ef, type = 'l', xaxt = "n", xlab = "", ylab = "Mean efficiency of EVs (km/kWh)", main = "Time series of EV efficiencies")
 axis(1,labels = paste(monthly_EV_data$year, monthly_EV_data$month, sep = "-"), at = monthly_EV_data$m, las = 2,srt = 35)
