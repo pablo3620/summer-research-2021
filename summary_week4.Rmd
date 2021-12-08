@@ -228,7 +228,7 @@ decomp_eff = decompose(eff_series,"multiplicative")
 
 
 Time = attributes(eff_series)$tsp
-Time = seq(Time[1],Time[2], length.out=(Time[2]-Time[1])*Time[3])
+Time = seq(Time[1],Time[2], length.out=round((Time[2]-Time[1])*Time[3]+1))
 
 # Convert td to data frame
 dat = cbind(Time, with(decomp_eff, data.frame(Observed=x, Trend=trend, Seasonal=seasonal, Random=random)))
@@ -304,13 +304,61 @@ For now I have 3 data sets regarding fuel usage
   \end{itemize}
   \item quarterly regional fuel sales data
   \begin{itemize}
-    \item quarterly data for all sales at fuel stations broken down by region
+    \item quarterly data for all sales at fuel stations broken down by region from MBIE
   \end{itemize}
   \item quarterly fuel trade data
     \begin{itemize}
     \item quarterly data of fuel used for transport by type of fuel
   \end{itemize}
 \end{itemize}
+
+As an initial analysis of the fuel usage in NZ I load the quarterly regional fuel sales data so that I can isolate only petrol usage in domestic land transport which should be a accurate representation of the fuel usage by passenger cars. Will be just combining regular petrol and premium for analysis. (Premium used to be more popular. Was there a definition change on premium and regular used in the data?)
+
+
+```{r fuel_data}
+#MBIE quaterly fuel usage data
+fuel_trade = read.csv("downloaded_stats/fuel_trade.csv", header = T)
+fuel_trade$qart = fuel_trade$month/3
+```
+
+```{r petrol_ts, warning=FALSE, message=FALSE}
+petrol_series = ts(fuel_trade$Petrol[fuel_trade$year < 2020], frequency = 4, start = min(fuel_trade$year))
+decomp_petrol = decompose(petrol_series, "multiplicative")
+
+Time = attributes(petrol_series)$tsp
+Time = seq(Time[1],Time[2], length.out=round((Time[2]-Time[1])*Time[3]+1))
+
+# Convert td to data frame
+dat = cbind(Time, with(decomp_petrol, data.frame(Observed=x, Trend=trend, Seasonal=seasonal, Random=random)))
+
+ggplot(gather(dat, component, value, -Time), aes(Time, value)) +
+  facet_grid(component ~ ., scales="free_y") +
+  geom_line() +
+  labs(y="Fuel usage (L)", x="Year") +
+  ggtitle("Decomposition of multiplicative Petrol usage time series")+
+  theme(plot.title=element_text(hjust=0.5))+
+  theme_bw()
+```
+
+I excluded the fuel data from 2020 as lockdowns were not an accurate representation of the general driving patterns of the NZ population. Looking at the decomposition above there is a clear seasonal trend however it not that significant and is smaller than the larger deviations of the random variations. 
+
+looking at the seasonal trend of fuel usage plotted against the change in efficiency below we can see that the Petrol usage actually tends to decrease when EV efficiency decreases. Assuming Petrol usage corresponds to VKT (Petrol vehicle efficiency does not change significantly by season) this suggests that the effect of winter decrease in efficiency on the electricity grid may be offset by the decrease in total VKT.
+
+```{r}
+par(mar = c(4, 4, 2, 4))
+plot(decomp_eff$figure, type = 'b', main = "NZ Seasonal Component Decompostions", xaxt = "n",
+     xlab = "", ylab = "Change in Efficiency")
+axis(1, labels = month.abb, at = 1:12, las = 3)
+
+points(unique(fuel_trade$month),decomp_petrol$figure, type = 'b', col = 2, xlab="", ylab="")
+mtext("Change in Petrol usage",side=4,line=2, cex = 1, col = 2) 
+axis(4, col = 2)
+
+legend("bottomright", legend = c("EV efficiency", "Petrol Usage"), lty = 1, col = 1:2)
+```
+
+In order to get a regional estimate I would need more data or make the assumption that all regions have equal petrol vs diesel usage which is unlikely to be true. Currently waiting on data from NZTA on VKT, Auckland city council and Wellington city council on fuel tax.
+
 
 
 
