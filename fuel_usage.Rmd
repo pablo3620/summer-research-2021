@@ -114,7 +114,7 @@ yearly_line(period = 1, count = 50)
 ```{r}
 plot(decomp_fuel_trade_cost$figure, type = 'l', main = "Seasonal component of Fuel purchases", xaxt = "n",
      xlab = "", ylab = "Change in Fuel purchases")
-#points(decomp_fuel_pur$figure, type = 'l', col = "red")
+points(decomp_fuel_pur$figure, type = 'l', col = "red")
 legend("bottomright", legend = c("quaterly data cost estimate", "monthly card purchases"), col = 1:2, lty = 1)
 axis(1, labels = month.name, at = 1:12, las = 3)
 ```

@@ -351,7 +351,7 @@ I excluded the fuel data from 2020 as lockdowns were not an accurate representat
 
 looking at the seasonal trend of fuel usage plotted against the change in efficiency below we can see that the Petrol usage actually tends to decrease when EV efficiency decreases. Assuming Petrol usage corresponds to VKT (Petrol vehicle efficiency does not change significantly by season) this suggests that the effect of winter decrease in efficiency on the electricity grid may be offset by the decrease in total VKT.
 
-```{r}
+```{r petrol_vs_eff}
 par(mar = c(4, 4, 2, 4))
 plot(decomp_eff$figure, type = 'b', main = "NZ Seasonal Component Decompostions", xaxt = "n",
      xlab = "", ylab = "Change in Efficiency")
