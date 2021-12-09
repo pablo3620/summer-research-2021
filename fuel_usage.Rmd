@@ -15,16 +15,12 @@ library(quantmod)
 library(forecast)
 library(tseries)
 library(stringr)
+rm(list=ls())
 
 ```
 
 ```{r functions}
-
-yearly_line = function(period = 12, count = 10) {
-  for (i in 0:count) {
-    abline(v = i*period+1, lty = 3)
-  }
-}
+source("r_functions/yearly_line.R")
 ```
 
 ```{r data_setup, message = FALSE}
