@@ -1,6 +1,5 @@
-source("r_functions/HDD.R")
-source("r_functions/CDD.R")
-source("r_functions/avg_temp.R")
+source("functions/weather_functions.R")
+
 
 
 
@@ -87,6 +86,25 @@ EV_data = merge(EV_data, HDD_data, by.x = c("year", "month", "weather_region"), 
 EV_data = merge(EV_data, CDD_data, by.x = c("year", "month", "weather_region"), by.y = c("Year", "Month", "City"), all.x = T)
 EV_data = merge(EV_data, avg_temp_data, by.x = c("year", "month", "weather_region"), by.y = c("Year", "Month", "City"), all.x = T)
 
-save(EV_data, weather_regions, file = "processed_data/EV_weather_data.rds")
+
+
+
+
+#EV data with columns averaged by month
+monthly_EV_data = EV_data[year >= 2017,] %>% 
+  group_by(year, month) %>% 
+  summarise(mean_kwh = mean(kwh), mean_dist = mean(distance), mean_ef = mean(efficiency))
+monthly_EV_data$m = 1:nrow(monthly_EV_data)
+
+#EV data with columns averaged by month and weather region
+monthly_reg_EV_data = EV_data[year >= 2017,] %>% 
+  na.omit() %>% 
+  group_by(year, month, weather_region) %>% 
+  summarise(mean_kwh = mean(kwh), mean_dist = mean(distance), mean_ef = mean(efficiency),
+            HDD = mean(HDD), CDD = mean(CDD), avg_temp = mean(avg_temp))
+
+
+
+save(EV_data, weather_regions,monthly_EV_data,monthly_reg_EV_data, file = "processed_data/EV_weather_data.rda")
 
 rm(list=ls())

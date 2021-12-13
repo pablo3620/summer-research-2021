@@ -20,7 +20,7 @@ rm(list=ls())
 ```
 
 ```{r functions}
-source("r_functions/yearly_line.R")
+source("functions/yearly_line.R")
 ```
 
 ```{r data_setup, message = FALSE}

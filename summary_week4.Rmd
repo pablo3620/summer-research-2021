@@ -13,39 +13,18 @@ library(tidyverse)
 library(quantmod)
 library(forecast)
 library(tseries)
-library(readr)
 library(knitr)
 rm(list=ls())
 ```
 
 ```{r functions, include = FALSE}
-source("r_functions/yearly_line.R")
+source("functions/yearly_line.R")
+source("functions/plot_ts_decomp.R")
 ```
 
-```{r data_setup, message = FALSE}
-
-source("r_functions/EV_weather_data.R", local	= myEnv)
-
-
-
-
+```{r ev_data_setup, message = FALSE}
+load("processed_data/EV_weather_data.rda")
 attach(EV_data)
-
-
-
-#EV data with columns averaged by month
-monthly_EV_data = EV_data[year >= 2017,] %>% 
-  group_by(year, month) %>% 
-  summarise(mean_kwh = mean(kwh), mean_dist = mean(distance), mean_ef = mean(efficiency))
-monthly_EV_data$m = 1:nrow(monthly_EV_data)
-
-#EV data with columns averaged by month and weather region
-monthly_reg_EV_data = EV_data[year >= 2017,] %>% 
-  na.omit() %>% 
-  group_by(year, month, weather_region) %>% 
-  summarise(mean_kwh = mean(kwh), mean_dist = mean(distance), mean_ef = mean(efficiency),
-            HDD = mean(HDD), CDD = mean(CDD), avg_temp = mean(avg_temp))
-
 ```
 
 ## Introduction
@@ -102,34 +81,14 @@ The decomposition shows that the seasonal trend goes from 0.93 times the mean ef
 
 
 
+
 ```{r eff_decomp_plot, message = FALSE, warning=FALSE, fig.height=6}
-eff_series = ts(monthly_EV_data$mean_ef, frequency = 12, start = 2017)
-decomp_eff = decompose(eff_series,"multiplicative")
-#base r plot commented out
-#plot(decomp_eff)
-#yearly_line(period = 1, 2100)
-# Get the time values for the time series
+decomp_eff = monthly_EV_data$mean_ef %>% 
+  ts(frequency = 12, start = 2017) %>% 
+  decompose("multiplicative")
 
+plot_decomp(decomp_eff, title = "Decomposition of Multiplicative Efficiency Time Series", ylab = "Efficiency")
 
-Time = attributes(eff_series)$tsp
-Time = seq(Time[1],Time[2], length.out=round((Time[2]-Time[1])*Time[3]+1))
-
-# Convert td to data frame
-dat = cbind(Time, with(decomp_eff, data.frame(Observed=x, Trend=trend, Seasonal=seasonal, Random=random)))
-
-ggplot(gather(dat, component, value, -Time), aes(Time, value)) +
-  facet_grid(component ~ ., scales="free_y") +
-  geom_line() +
-  labs(y="Efficiency", x="Year") +
-  ggtitle("Decomposition of multiplicative efficiency time series")+
-  theme(plot.title=element_text(hjust=0.5))+
-  theme_bw()
-
-  
-```
-
-```{r}
-#knitr::include_graphics("New Folder/Rplot.pdf")
 ```
 
 Looking at the plot below there is a very obvious seasonal trend to EV efficiency but so that I can compare it to HDD I limit this to just Auckland EVs.
@@ -175,8 +134,8 @@ The CDD term suggests that as the average number of cooling degree days per days
 
 
 ```{r eff_lm_model}
-eff_h_c_lm = lm(efficiency ~ HDD + CDD + weather_region + model, data = EV_data[year >=2017,], na.action=na.omit)
-summary(eff_h_c_lm)
+eff_h_c_w_m_lm = lm(efficiency ~ HDD + CDD + weather_region + model, data = EV_data[year >=2017,], na.action=na.omit)
+summary(eff_h_c_w_m_lm)
 ```
 
 
@@ -210,22 +169,12 @@ fuel_trade$qart = fuel_trade$month/3
 ```
 
 ```{r petrol_ts, warning=FALSE, message=FALSE}
-petrol_series = ts(fuel_trade$Petrol[fuel_trade$year < 2020], frequency = 4, start = min(fuel_trade$year))
-decomp_petrol = decompose(petrol_series, "multiplicative")
+decomp_petrol = fuel_trade$Petrol[fuel_trade$year < 2020] %>% 
+  ts(frequency = 4, start = min(fuel_trade$year)) %>% 
+  decompose("multiplicative")
+  
 
-Time = attributes(petrol_series)$tsp
-Time = seq(Time[1],Time[2], length.out=round((Time[2]-Time[1])*Time[3]+1))
-
-# Convert td to data frame
-dat = cbind(Time, with(decomp_petrol, data.frame(Observed=x, Trend=trend, Seasonal=seasonal, Random=random)))
-
-ggplot(gather(dat, component, value, -Time), aes(Time, value)) +
-  facet_grid(component ~ ., scales="free_y") +
-  geom_line() +
-  labs(y="Fuel usage (L)", x="Year") +
-  ggtitle("Decomposition of multiplicative Petrol usage time series")+
-  theme(plot.title=element_text(hjust=0.5))+
-  theme_bw()
+plot_decomp(decomp_petrol, title = "Decomposition of Multiplicative Petrol Usage Time Series", ylab = "Fuel usage (L)")
 ```
 
 I excluded the fuel data from 2020 as lockdowns were not an accurate representation of the general driving patterns of the NZ population. Looking at the decomposition above there is a clear seasonal trend however it not that significant and is smaller than the larger deviations of the random variations. 
