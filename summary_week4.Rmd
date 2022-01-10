@@ -119,7 +119,9 @@ Further looking into this we can see that in Auckland as the average temperature
 
 ```{r temp_eff_plot, message=FALSE}
 monthly_reg_EV_data[monthly_reg_EV_data$weather_region == "Auckland",] %>%
-  ggplot(aes(avg_temp, mean_ef)) + geom_point() + geom_smooth(method = 'loess') + ggtitle("Auckland Monthly Efficiency by Temperature") + labs(y="Monthly Average Efficiency", x="Monthly Average Temperature")
+  ggplot(aes(avg_temp, mean_ef)) + geom_point() + geom_smooth(method = 'loess') +
+  ggtitle("Auckland Monthly Efficiency by Temperature") +
+  labs(y="Monthly Average Efficiency", x="Monthly Average Temperature")
 ```
 
 A linear model is use to model efficiency by HDD and CDD.

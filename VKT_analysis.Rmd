@@ -1,0 +1,33 @@
+---
+title: "VKT analysis"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = F)
+knitr::opts_chunk$set(fig.width=9, fig.height=60) 
+library(tidyverse)
+library(forecast)
+library(tseries)
+library(knitr)
+rm(list=ls())
+```
+
+```{r functions, include = FALSE}
+source("functions/yearly_line.R")
+source("functions/plot_ts_decomp.R")
+```
+
+```{r}
+vkt = read.csv("downloaded_stats/VKT_main_quart.csv")
+vkt_other_yearly = read.csv("downloaded_stats/VKT_other_yearly.csv")
+vkt_fuel_yearly = read.csv("downloaded_stats/VKT_fuel_vehicle_type_yearly.csv")
+```
+
+```{r}
+decomp_vkt = vkt[vkt$year >= 2003,3:13] %>% 
+  ts(frequency = 4, start = min(2003)) %>% 
+  decompose("multiplicative")
+
+plot_decomp(decomp_vkt)
+```
