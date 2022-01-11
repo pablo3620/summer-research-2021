@@ -4,8 +4,8 @@ output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = F)
-knitr::opts_chunk$set(fig.width=9, fig.height=60) 
+knitr::opts_chunk$set(echo = T)
+knitr::opts_chunk$set(fig.width=9, fig.height=5) 
 library(tidyverse)
 library(forecast)
 library(tseries)
@@ -25,9 +25,56 @@ vkt_fuel_yearly = read.csv("downloaded_stats/VKT_fuel_vehicle_type_yearly.csv")
 ```
 
 ```{r}
-decomp_vkt = vkt[vkt$year >= 2003,3:13] %>% 
+decomp_vkt_auck = vkt[vkt$year >= 2003,3:13]$Auckland %>% 
   ts(frequency = 4, start = min(2003)) %>% 
   decompose("multiplicative")
 
-plot_decomp(decomp_vkt)
+plot_decomp(decomp_vkt_auck, ylab = "Million km travelled", title = "Decomposition of Auckland VKT Time Series")
 ```
+
+
+if we make the assumption of the seasonal trend of VKT following a sin wave we can use the equation 
+$$y = a \sin{ \left( \frac{2\pi}{12}(x-b)\right)} + c$$
+to calculate what such sin wave would have been required to produce the quarterly "Boxes" we can adjust the parameters $a$, $b$, and $c$ to minimize the difference in integral sum. 
+
+$y$ would be a kind of rolling (sum of km)/month
+
+(3 parameters so 3 degrees of freedom and 4 points to base off so will still be slight averaging going on)
+
+
+```{r}
+a_list = seq(0,0.05,0.0001)
+b_list = seq(0,12,0.01)
+c_list = 1 # it is centered on 1 so does not need to change
+#vector order is best a,b,c values and lowest mean squared error
+best_comb = c(0,0,0,Inf)
+i = 0;
+
+sin_func = function(x, a, b, c) {
+  return(a*sin(2*pi*(x-b)/12)+c)
+}
+
+for (a in a_list) {
+  for (b in b_list) {
+    for (c in c_list){
+      i = i+1
+      quart_sin = c(integrate(sin_func, 0,3, a = a, b = b, c = c)$value, integrate(sin_func, 3,6, a = a, b = b, c = c)$value,
+                    integrate(sin_func, 6,9, a = a, b = b, c = c)$value, integrate(sin_func, 9,12, a = a, b = b, c = c)$value)
+      error = mean((quart_sin-decomp_vkt_auck$figure*3)^2)
+      if (error < best_comb[4]) {
+        best_comb = c(a,b,c,error)
+      }
+    }
+  }
+}
+best_comb
+print(i)
+
+```
+```{r}
+barplot(decomp_vkt_auck$figure, ylim = c(0.985,1.015), xpd = FALSE, names.arg = c("Q1","Q2","Q3","Q4"), space = 0)
+points(x = seq(0,4,0.01), sin_func(seq(0,12,0.03),best_comb[1],best_comb[2],best_comb[3]), type = "l")
+```
+
+
+
