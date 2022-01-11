@@ -61,6 +61,8 @@ for (a in a_list) {
       quart_sin = c(integrate(sin_func, 0,3, a = a, b = b, c = c)$value, integrate(sin_func, 3,6, a = a, b = b, c = c)$value,
                     integrate(sin_func, 6,9, a = a, b = b, c = c)$value, integrate(sin_func, 9,12, a = a, b = b, c = c)$value)
       error = mean((quart_sin-decomp_vkt_auck$figure*3)^2)
+      #should use mean absolute or mean sqaured error
+      #error = mean(abs(quart_sin-decomp_vkt_auck$figure*3))
       if (error < best_comb[4]) {
         best_comb = c(a,b,c,error)
       }
@@ -73,7 +75,7 @@ print(i)
 ```
 ```{r}
 barplot(decomp_vkt_auck$figure, ylim = c(0.985,1.015), xpd = FALSE, names.arg = c("Q1","Q2","Q3","Q4"), space = 0)
-points(x = seq(0,4,0.01), sin_func(seq(0,12,0.03),best_comb[1],best_comb[2],best_comb[3]), type = "l")
+points(x = seq(0,4,0.001), sin_func(seq(0,12,0.003),best_comb[1],best_comb[2],best_comb[3]), type = "l")
 ```
 
 
