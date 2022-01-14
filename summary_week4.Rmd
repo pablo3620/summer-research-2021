@@ -77,7 +77,7 @@ Used 2 different methods of decomposition of the seasonal trend of efficiency.
 
 In the end seems better to use Time series Decomposition for overall efficiency trend but is still useful to see from the linear model without assuming any correlation between the months it still has very strong confidence intervals (p-value $< 2^{-16}$). Could be worth doing some more in depth using linear model and modeling by car.
 
-The decomposition shows that the seasonal trend goes from 0.93 times the mean efficiency in June to 1.025 the mean efficiency in February and March, A difference of 10%.
+
 
 
 
@@ -90,10 +90,9 @@ decomp_eff = monthly_EV_data$mean_ef %>%
 plot_decomp(decomp_eff, title = "Decomposition of Multiplicative Efficiency Time Series", ylab = "Efficiency")
 
 ```
+The decomposition shows that the seasonal trend goes from 0.93 times the mean efficiency in June to 1.025 the mean efficiency in February and March, A difference of 10%.
 
-Looking at the plot below there is a very obvious seasonal trend to EV efficiency but so that I can compare it to HDD I limit this to just Auckland EVs.
 
-Within Auckland looking at the plot it is very obvious that as number of heating degree days increases the efficiency of the EV decreases. I do notice a slight dip in efficiency during Jan and Feb and it can be questioned if that is due to AC usage which would decrease range \cite{ev_range} or other factors such as holiday travel which could involve highway driving which EVs are generally less efficient at \cite{ev_highway}. This effect is not obvious in the overall trend this could be as Auckland for the most part is a warmer climate than the rest of NZ.
 
 
 ```{r eff_HDD_plot, warning=FALSE}
@@ -115,7 +114,11 @@ axis(4)
 legend("topright", legend = c("EV efficiency", "HDD"), lty = 1, col = 1:2)
 ```
 
-Further looking into this we can see that in Auckland as the average temperature of the month starts increasing past 17.5 there appears to be a trend towards decreasing EV efficiency. As stated before research \cite{ev_range} suggested AC also decreases efficiency of the EV. This made me think what if we include cooling degree days and heating degree days in analysis? This could also be useful to explain the points well below the trend line that may be from a month where there was both cold and warm days contributing to a high usage of cabin temperature control decreasing range but average temperature would not be able to show this. 
+
+Looking at the plot there is a very obvious seasonal trend to EV efficiency but so that I can compare it to HDD I limit this to just Auckland EVs.
+
+Within Auckland looking at the plot it is very obvious that as number of heating degree days increases the efficiency of the EV decreases. I do notice a slight dip in efficiency during Jan and Feb and it can be questioned if that is due to AC usage which would decrease range \cite{ev_range} or other factors such as holiday travel which could involve highway driving which EVs are generally less efficient at \cite{ev_highway}. This effect is not obvious in the overall trend this could be as Auckland for the most part is a warmer climate than the rest of NZ.
+
 
 ```{r temp_eff_plot, message=FALSE}
 monthly_reg_EV_data[monthly_reg_EV_data$weather_region == "Auckland",] %>%
@@ -124,15 +127,15 @@ monthly_reg_EV_data[monthly_reg_EV_data$weather_region == "Auckland",] %>%
   labs(y="Monthly Average Efficiency", x="Monthly Average Temperature")
 ```
 
+Further looking into this we can see that in Auckland as the average temperature of the month starts increasing past 17.5 there appears to be a trend towards decreasing EV efficiency. As stated before research \cite{ev_range} suggested AC also decreases efficiency of the EV. This made me think what if we include cooling degree days and heating degree days in analysis? This could also be useful to explain the points well below the trend line that may be from a month where there was both cold and warm days contributing to a high usage of cabin temperature control decreasing range but average temperature would not be able to show this. 
+
+
 A linear model is use to model efficiency by HDD and CDD.
 
 A different intercept is used for each model of car as a majority of the variation in efficiency will be due to different vehicle models, therefore, including the model allows for much better model fit and smaller confidence intervals. A different intercept is also used for each weather region as a weather might be measured in a cold or hot section of region and also the region may have more or less hill/highway which could influence driving patterns impacting efficiency (for simplicity preferable if not included but model is much better fit if is included). However the Gradient of HDD term and CDD term is kept same for all regions and models as it this is the number we are trying to find to see how the number of HDD and CDD effect the efficiency of the EV. A baseline of Auckland and Nissan Leaf (24 kWh) 2013-2016 are used for the region and model as there is the most amount of data in them.
 
 A linear model is used as with the correct base temperature the usage of power to warm/cool the cabin should be roughly linear to the HDD/CDD \cite{HDD_est}. Unfortunately, cars unlike houses or buildings are often only used at particular hours of the day for short period so this may break down or have more dependency towards the temperature at times such as the morning or evening commute hours. 
 
-The HDD term suggests that as the average number of heating degree days per days increases by 1 the average efficiency of EVs for the month decreases by 0.103. With a p-value of $<2\times10^{-16}$ we are quite confident on this value. 
-
-The CDD term suggests that as the average number of cooling degree days per days increases by 1 the average efficiency of EVs for the month decreases by 0.113. With a p-value of $8.61\times10^{-5}$ we are less confident on this value. This is likely as there is much less data in New Zealand regarding cooling degree days as NZ is a much cooler climate compared to where a lot of the other research on EVs is going on. 
 
 
 ```{r eff_lm_model}
@@ -140,6 +143,10 @@ eff_h_c_w_m_lm = lm(efficiency ~ HDD + CDD + weather_region + model, data = EV_d
 summary(eff_h_c_w_m_lm)
 ```
 
+
+The HDD term suggests that as the average number of heating degree days per days increases by 1 the average efficiency of EVs for the month decreases by 0.103. With a p-value of $<2\times10^{-16}$ we are quite confident on this value. 
+
+The CDD term suggests that as the average number of cooling degree days per days increases by 1 the average efficiency of EVs for the month decreases by 0.113. With a p-value of $8.61\times10^{-5}$ we are less confident on this value. This is likely as there is much less data in New Zealand regarding cooling degree days as NZ is a much cooler climate compared to where a lot of the other research on EVs is going on. 
 
 If we know that EVs are less efficient in the winter due to heating requirements and to a much lesser extent in NZ less efficient on warm days due to AC in order to see how this will affect the grid we need to see how this correlates with NZ populations driving pattern. 
 
@@ -181,7 +188,7 @@ plot_decomp(decomp_petrol, title = "Decomposition of Multiplicative Petrol Usage
 
 I excluded the fuel data from 2020 as lockdowns were not an accurate representation of the general driving patterns of the NZ population. Looking at the decomposition above there is a clear seasonal trend however it not that significant and is smaller than the larger deviations of the random variations. 
 
-looking at the seasonal trend of fuel usage plotted against the change in efficiency below we can see that the Petrol usage actually tends to decrease when EV efficiency decreases. Assuming Petrol usage corresponds to VKT (Petrol vehicle efficiency does not change significantly by season) this suggests that the effect of winter decrease in efficiency on the electricity grid may be offset by the decrease in total VKT.
+
 
 ```{r petrol_vs_eff}
 par(mar = c(4, 4, 2, 4))
@@ -195,6 +202,9 @@ axis(4, col = 2)
 
 legend("bottomright", legend = c("EV efficiency", "Petrol Usage"), lty = 1, col = 1:2)
 ```
+
+Looking at the seasonal trend of fuel usage plotted against the change in efficiency below we can see that the Petrol usage actually tends to decrease when EV efficiency decreases. Assuming Petrol usage corresponds to VKT (Petrol vehicle efficiency does not change significantly by season) this suggests that the effect of winter decrease in efficiency on the electricity grid may be offset by the decrease in total VKT.
+
 
 In order to get a regional estimate I would need more data or make the assumption that all regions have equal petrol vs diesel usage which is unlikely to be true. Currently waiting on data from NZTA on VKT, Auckland city council and Wellington city council on fuel tax.
 

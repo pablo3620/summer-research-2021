@@ -129,15 +129,15 @@ monthly_reg_EV_data[monthly_reg_EV_data$weather_region == "Auckland",] %>% ggplo
 ```
 
 ```{r}
-eff_h_c_lm = lm(efficiency ~ CDD + HDD +weather_region + model, data = EV_data[year >=2017,], na.action=na.omit)
+eff_h_c_lm = lm((1/efficiency) ~ CDD + HDD + weather_region + model, data = EV_data[year >=2017,], na.action=na.omit)
 summary(eff_h_c_lm)
 ```
 
 
-```{r lm_plots, fig.show='hide'}
-plot(eff_lm)
-plot(eff_reg_lm)
-plot(eff_h_c_lm)
+```{r lm_plots}
+#plot(eff_lm)
+#plot(eff_reg_lm)
+plot(eff_h_c_lm, col = c(1,2)[1+(model == "Tesla Model-X" | model == "Conversion to EV")])
 ```
 cooling degree days does explain extra variance but not much. likely as not many cooling days above 20 in nz
 ```{r}
