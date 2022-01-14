@@ -24,7 +24,13 @@ source("functions/yearly_line.R")
 
 ```{r ev_data_setup, message = FALSE}
 load("processed_data/EV_weather_data.rda")
+#EV_data = EV_data[EV_data$efficiency > 4,]
+
+#bad data vehicles
 attach(EV_data)
+EV_data = EV_data[vehicle != "38f81643" & vehicle != "d6082525" & vehicle != "ae05b6a6" & vehicle != "667822bd" & vehicle != "ad7a2a1e", ]
+
+
 ```
 
 ```{r regions,message = FALSE}
@@ -115,7 +121,7 @@ summary(eff_lm)
 ```
 different city weather stations may be measuring colder or warmer regions of the city and therefore may need a slightly different scaling. interesting that Rotorua has lower effect on HDD, could be cause Rotorua is inland Bay of Plenty so its temperature change is more significant that coastal Tauranga which would also be included in bay of plenty.
 ```{r}
-eff_reg_lm = lm(efficiency ~ HDD+ model, data = EV_data[year >=2017,], na.action=na.omit)
+eff_reg_lm = lm(efficiency ~ CDD + HDD + weather_region + model, data = EV_data, na.action=na.omit)
 summary(eff_reg_lm)
 ```
 
@@ -129,15 +135,15 @@ monthly_reg_EV_data[monthly_reg_EV_data$weather_region == "Auckland",] %>% ggplo
 ```
 
 ```{r}
-eff_h_c_lm = lm((1/efficiency) ~ CDD + HDD + weather_region + model, data = EV_data[year >=2017,], na.action=na.omit)
+eff_h_c_lm = lm((1/efficiency) ~ CDD + HDD + weather_region + model, data = EV_data, na.action=na.omit, weights = distance)
 summary(eff_h_c_lm)
 ```
 
 
 ```{r lm_plots}
 #plot(eff_lm)
-#plot(eff_reg_lm)
-plot(eff_h_c_lm, col = c(1,2)[1+(model == "Tesla Model-X" | model == "Conversion to EV")])
+plot(eff_reg_lm)
+plot(eff_h_c_lm, col = c(1,2)[vehicle = "ea66a66d",  ])
 ```
 cooling degree days does explain extra variance but not much. likely as not many cooling days above 20 in nz
 ```{r}
