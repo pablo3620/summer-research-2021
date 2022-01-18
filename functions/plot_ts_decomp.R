@@ -1,4 +1,4 @@
-plot_decomp = function(decomp, title = "Decomposition of Time Series", xlab = "Year", ylab = "") {
+plot_decomp = function(decomp, title = "Decomposition of Time Series", xlab = "Year", ylab = "", breaks = 6) {
   Time = attributes(decomp$x)$tsp
   Time = seq(Time[1],Time[2], length.out=round((Time[2]-Time[1])*Time[3]+1))
   
@@ -10,7 +10,8 @@ plot_decomp = function(decomp, title = "Decomposition of Time Series", xlab = "Y
     geom_line() +
     labs(y=ylab, x=xlab) +
     ggtitle(title)+
-    theme(plot.title=element_text(hjust=0.5))+
-    theme_bw()
+    theme(plot.title=element_text(hjust=0.5)) +
+    theme_bw() +
+    scale_x_continuous(n.breaks = breaks)
   return(plot)
 }

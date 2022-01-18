@@ -18,18 +18,18 @@ source("functions/yearly_line.R")
 source("functions/plot_ts_decomp.R")
 ```
 
-```{r}
+```{r VKT_data}
 vkt = read.csv("downloaded_stats/VKT_main_quart.csv")
 vkt_other_yearly = read.csv("downloaded_stats/VKT_other_yearly.csv")
 vkt_fuel_yearly = read.csv("downloaded_stats/VKT_fuel_vehicle_type_yearly.csv")
 ```
 
-```{r}
-decomp_vkt_auck = vkt[vkt$year >= 2003,3:13]$Auckland %>% 
+```{r VKT_ts}
+decomp_vkt = vkt[vkt$year >= 2003,]$Auckland %>% 
   ts(frequency = 4, start = min(2003)) %>% 
   decompose("multiplicative")
 
-plot_decomp(decomp_vkt_auck, ylab = "Million km travelled", title = "Decomposition of Auckland VKT Time Series")
+plot_decomp(decomp_vkt, ylab = "Million km travelled", title = "Decomposition of Total VKT Time Series")
 ```
 
 
@@ -42,7 +42,7 @@ $y$ would be a kind of rolling (sum of km)/month
 (3 parameters so 3 degrees of freedom and 4 points to base off so will still be slight averaging going on)
 
 
-```{r}
+```{r find_sin_plot, eval = FALSE}
 a_list = seq(0,0.05,0.0001)
 b_list = seq(0,12,0.01)
 c_list = 1 # it is centered on 1 so does not need to change
@@ -73,7 +73,7 @@ best_comb
 print(i)
 
 ```
-```{r}
+```{r plot_sin_plot, eval=FALSE}
 barplot(decomp_vkt_auck$figure, ylim = c(0.985,1.015), xpd = FALSE, names.arg = c("Q1","Q2","Q3","Q4"), space = 0)
 points(x = seq(0,4,0.001), sin_func(seq(0,12,0.003),best_comb[1],best_comb[2],best_comb[3]), type = "l")
 ```
