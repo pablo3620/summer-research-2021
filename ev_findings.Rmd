@@ -6,7 +6,7 @@ output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = F)
+knitr::opts_chunk$set(echo = T)
 knitr::opts_chunk$set(fig.width=9, fig.height=5) 
 library(dplyr)
 library(ggplot2)
@@ -29,20 +29,20 @@ load("processed_data/EV_weather_data.rda")
 
 ```{r}
 #not strictly a log x axis so that zero can be represented. axis labels are right
-plot(EV_data$distance + 1,1/EV_data$efficiency, pch = 4,log = "x", ylab = "Power usage (kWh/km)", xlab = "distance driven (km)", xaxt = "n")
+plot(EV_data$distance + 1, EV_data$consumption, pch = 4,log = "x", ylab = "Power usage (kWh/km)", xlab = "distance driven (km)", xaxt = "n")
 axis(1, c(0,10,100,1000,10000), at = c(1,9,99,999,9999))
 ```
 
 
 
-```{r ev_data_setup, message = FALSE}
+```{r, message = FALSE}
 #bad data vehicles
 EV_data = EV_data[EV_data$vehicle != "38f81643" & EV_data$vehicle != "d6082525" & EV_data$vehicle != "ae05b6a6" & EV_data$vehicle != "667822bd" & EV_data$vehicle != "ad7a2a1e" & EV_data$vehicle != "88ee3e2d" & EV_data$vehicle != "e6959846"& EV_data$vehicle != "8a170585" & EV_data$vehicle != "ea66a66d", ]
 
 ```
 
 ```{r}
-plot(EV_data$distance + 1,1/EV_data$efficiency, pch = 4,log = "x", ylab = "Power usage (kWh/km)", xlab = "distance driven (km)", xaxt = "n")
+plot(EV_data$distance + 1,EV_data$efficiency, pch = 4,log = "x", ylab = "Power usage (kWh/km)", xlab = "distance driven (km)", xaxt = "n")
 axis(1, c(0,10,100,1000,10000), at = c(1,9,99,999,9999))
 ```
 
@@ -148,7 +148,7 @@ monthly_reg_EV_data[monthly_reg_EV_data$weather_region == "Auckland",] %>% ggplo
 ```
 
 ```{r}
-eff_h_c_lm = lm((1/efficiency) ~ HDD + CDD + weather_region + model, data = EV_data, na.action=na.omit, weights = distance)
+eff_h_c_lm = lm(consumption ~ HDD + CDD + weather_region + model, data = EV_data, na.action=na.omit, weights = distance)
 summary(eff_h_c_lm)
 ```
 

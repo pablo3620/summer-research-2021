@@ -12,6 +12,8 @@ month_length = c(31,28,31,30,31,30,31,31,30,31,30,31)
 #main EV data
 EV_data = read.csv("../Ftf Efficiency Dataset/ftf_ev_efficiency_distance_models_20211006_v1.0.csv")[-1]
 EV_data$weather_region = as.factor(names(weather_regions)[match(EV_data$region,  weather_regions)])
+EV_data$consumption = 1000/EV_data$efficiency # converting from km/kWh to Wh/km
+
 
 #sort factor by popularity
 region_pop = EV_data %>%
@@ -29,6 +31,11 @@ rm(model_pop)
 
 #remove PHEV
 EV_data = EV_data[EV_data$model != "Mitsubishi Outlander" & EV_data$model != "Toyota Prius" & EV_data$model != "Mini Countryman PHEV" & EV_data$model != "Conversion to EV", ]
+
+#bad data vehicles
+#bad_cars = EV_data[EV_data$vehicle = "38f81643" & EV_data$vehicle = "d6082525" & EV_data$vehicle = "ae05b6a6" & EV_data$vehicle = "667822bd" & EV_data$vehicle = "ad7a2a1e" & EV_data$vehicle = "88ee3e2d" & EV_data$vehicle = "e6959846"& EV_data$vehicle = "8a170585" & EV_data$vehicle = "ea66a66d", ]
+EV_data = EV_data[EV_data$vehicle != "38f81643" & EV_data$vehicle != "d6082525" & EV_data$vehicle != "ae05b6a6" & EV_data$vehicle != "667822bd" & EV_data$vehicle != "ad7a2a1e" & EV_data$vehicle != "88ee3e2d" & EV_data$vehicle != "e6959846"& EV_data$vehicle != "8a170585" & EV_data$vehicle != "ea66a66d", ]
+
 
 
 #weather data
@@ -66,6 +73,7 @@ napier_weather$Month = match(napier_weather$Month, month.abb)
 invercargill_weather = read.csv('weather_data/invercargill_ews_data.csv', na.strings = "-", stringsAsFactors = T)
 invercargill_weather$Month = match(invercargill_weather$Month, month.abb)
 
+
 #temp calculations
 HDD_data = Reduce(rbind, list(HDD(auckland_weather), HDD(upperhutt_weather), HDD(christchurch_weather),
                               HDD(dunedin_weather), HDD(hamilton_weather), HDD(rotorua_weather), HDD(clyde_weather),
@@ -94,15 +102,14 @@ EV_data = merge(EV_data, avg_temp_data, by.x = c("year", "month", "weather_regio
 #EV data with columns averaged by month
 monthly_EV_data = EV_data[EV_data$year >= 2017,] %>% 
   group_by(year, month) %>% 
-  summarise(mean_kwh = mean(kwh), mean_dist = mean(distance), mean_ef = mean(efficiency))
+  summarise(mean_kwh = mean(kwh), mean_dist = mean(distance), mean_ef = mean(efficiency*distance)/mean(distance), mean_consum = mean(consumption*distance)/mean(distance))
 monthly_EV_data$m = 1:nrow(monthly_EV_data)
 
 #EV data with columns averaged by month and weather region
 monthly_reg_EV_data = EV_data[EV_data$year >= 2017,] %>% 
   na.omit() %>% 
   group_by(year, month, weather_region) %>% 
-  summarise(mean_kwh = mean(kwh), mean_dist = mean(distance), mean_ef = mean(efficiency),
-            HDD = mean(HDD), CDD = mean(CDD), avg_temp = mean(avg_temp))
+  summarise(mean_kwh = mean(kwh), mean_dist = mean(distance), mean_ef = mean(efficiency*distance)/mean(distance), mean_consum = mean(consumption*distance)/mean(distance), HDD = mean(HDD), CDD = mean(CDD), avg_temp = mean(avg_temp))
 
 #only use EV data from 2017
 EV_data = EV_data[EV_data$year >= 2017,]

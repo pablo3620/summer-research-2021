@@ -80,3 +80,9 @@ points(x = seq(0,4,0.001), sin_func(seq(0,12,0.003),best_comb[1],best_comb[2],be
 
 
 
+```{r}
+
+```
+
+
+
