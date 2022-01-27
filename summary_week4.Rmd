@@ -34,7 +34,8 @@ fuel_trade$qart = fuel_trade$month/3
 ```
 
 ```{r VKT_data, message = FALSE}
-vkt = read.csv("downloaded_stats/VKT_main_quart.csv")
+#vkt = read.csv("downloaded_stats/VKT_main_quart.csv")
+load("processed_data/VKT_data.rda")
 ```
 
 ## Introduction
@@ -158,7 +159,7 @@ A different intercept is used for each model of car as a majority of the variati
 
 
 ```{r eff_lm_model}
-eff_lm_model = lm(consumption ~ HDD + CDD + weather_region + model, data = EV_data[year >=2017,], na.action=na.omit, weights = distance)
+eff_lm_model = lm(consumption ~ HDD + CDD + weather_region + model, data = EV_data, na.action=na.omit, weights = distance)
 summary(eff_lm_model)
 ```
 
@@ -201,10 +202,10 @@ plot_decomp(decomp_petrol, title = "Decomposition of Multiplicative Petrol Usage
 
 I excluded the fuel data from 2020 as lockdowns were not an accurate representation of the general driving patterns of the NZ population. Looking at the decomposition above there is a clear seasonal trend however it not that significant and is smaller than the larger deviations of the random variations.
 
-We can also compare this to the VKT data from NZTA. This data was given by Haobo from NZTA and is collected using VKT based on WoF/CoF odometer \cite{NZTA_VKT}. 
+We can also compare this to the VKT data from NZTA. This data was given by Haobo Wang from NZTA and is collected using VKT based on WoF/CoF odometer \cite{NZTA_VKT}. 
 
 ```{r VKT_ts, warning=FALSE, message=FALSE}
-decomp_vkt = vkt[vkt$year >= 2003,]$total %>% 
+decomp_vkt = vkt_quart[vkt_quart$year >= 2003,]$total %>% 
   ts(frequency = 4, start = min(2003)) %>% 
   decompose("multiplicative")
 

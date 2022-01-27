@@ -15,27 +15,14 @@ EV_data$weather_region = as.factor(names(weather_regions)[match(EV_data$region, 
 EV_data$consumption = 1000/EV_data$efficiency # converting from km/kWh to Wh/km
 
 
-#sort factor by popularity
-region_pop = EV_data %>%
-  group_by(weather_region) %>% 
-  summarise(count =  n_distinct(vehicle)) %>% 
-  arrange(-count)
-model_pop = EV_data %>%
-  group_by(model) %>% 
-  summarise(count =  n_distinct(vehicle)) %>% 
-  arrange(-count)
-EV_data$weather_region = factor(EV_data$weather_region, levels = region_pop$weather_region)
-EV_data$model = factor(EV_data$model, levels = model_pop$model)
-rm(region_pop)
-rm(model_pop)
+
 
 #remove PHEV
-EV_data = EV_data[EV_data$model != "Mitsubishi Outlander" & EV_data$model != "Toyota Prius" & EV_data$model != "Mini Countryman PHEV" & EV_data$model != "Conversion to EV", ]
+EV_data = EV_data[EV_data$model != "Mitsubishi Outlander" & EV_data$model != "Toyota Prius" & EV_data$model != "Mini Countryman PHEV" & EV_data$model != "Conversion to EV" & EV_data$model !="Audi A3 e-tron", ]
 
 #bad data vehicles
 #bad_cars = EV_data[EV_data$vehicle = "38f81643" & EV_data$vehicle = "d6082525" & EV_data$vehicle = "ae05b6a6" & EV_data$vehicle = "667822bd" & EV_data$vehicle = "ad7a2a1e" & EV_data$vehicle = "88ee3e2d" & EV_data$vehicle = "e6959846"& EV_data$vehicle = "8a170585" & EV_data$vehicle = "ea66a66d", ]
 EV_data = EV_data[EV_data$vehicle != "38f81643" & EV_data$vehicle != "d6082525" & EV_data$vehicle != "ae05b6a6" & EV_data$vehicle != "667822bd" & EV_data$vehicle != "ad7a2a1e" & EV_data$vehicle != "88ee3e2d" & EV_data$vehicle != "e6959846"& EV_data$vehicle != "8a170585" & EV_data$vehicle != "ea66a66d", ]
-
 
 
 #weather data
@@ -96,26 +83,42 @@ EV_data = merge(EV_data, CDD_data, by.x = c("year", "month", "weather_region"), 
 EV_data = merge(EV_data, avg_temp_data, by.x = c("year", "month", "weather_region"), by.y = c("Year", "Month", "City"), all.x = T)
 
 
+#only use EV data from 2017
+EV_data = EV_data[EV_data$year >= 2017,]
+#remove EV data with missing weather regions
+EV_data = na.omit(EV_data)
+
+#sort factor by popularity
+region_pop = EV_data %>%
+  group_by(weather_region) %>% 
+  summarise(count =  n_distinct(vehicle)) %>% 
+  arrange(-count)
+model_pop = EV_data %>%
+  group_by(model) %>% 
+  summarise(count =  n_distinct(vehicle)) %>%
+  mutate(freq = count / sum(count)) %>% 
+  arrange(-count)
+EV_data$weather_region = factor(EV_data$weather_region, levels = region_pop$weather_region)
+EV_data$model = factor(EV_data$model, levels = model_pop$model)
+
+
 
 
 
 #EV data with columns averaged by month
-monthly_EV_data = EV_data[EV_data$year >= 2017,] %>% 
+monthly_EV_data = EV_data %>% 
   group_by(year, month) %>% 
   summarise(mean_kwh = mean(kwh), mean_dist = mean(distance), mean_ef = mean(efficiency*distance)/mean(distance), mean_consum = mean(consumption*distance)/mean(distance))
 monthly_EV_data$m = 1:nrow(monthly_EV_data)
 
 #EV data with columns averaged by month and weather region
-monthly_reg_EV_data = EV_data[EV_data$year >= 2017,] %>% 
+monthly_reg_EV_data = EV_data %>% 
   na.omit() %>% 
   group_by(year, month, weather_region) %>% 
   summarise(mean_kwh = mean(kwh), mean_dist = mean(distance), mean_ef = mean(efficiency*distance)/mean(distance), mean_consum = mean(consumption*distance)/mean(distance), HDD = mean(HDD), CDD = mean(CDD), avg_temp = mean(avg_temp))
 
-#only use EV data from 2017
-EV_data = EV_data[EV_data$year >= 2017,]
 
 
-
-save(EV_data, weather_regions,monthly_EV_data,monthly_reg_EV_data, file = "processed_data/EV_weather_data.rda")
+save(EV_data, weather_regions,monthly_EV_data,monthly_reg_EV_data, model_pop,HDD_data,CDD_data, file = "processed_data/EV_weather_data.rda")
 
 rm(list=ls())
