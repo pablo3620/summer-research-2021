@@ -59,21 +59,27 @@ napier_weather$Month = match(napier_weather$Month, month.abb)
 #use invercargill for southland
 invercargill_weather = read.csv('weather_data/invercargill_ews_data.csv', na.strings = "-", stringsAsFactors = T)
 invercargill_weather$Month = match(invercargill_weather$Month, month.abb)
+#Gisborne data
+gisborne_weather = read.csv('weather_data/gisborne_ews_data.csv', na.strings = "-", stringsAsFactors = T)
+gisborne_weather$Month = match(gisborne_weather$Month, month.abb)
+#greymouth data
+greymouth_weather = read.csv('weather_data/greymouth_areo_ews.csv', na.strings = "-", stringsAsFactors = T)
+greymouth_weather$Month = match(greymouth_weather$Month, month.abb)
 
 
 #temp calculations
 HDD_data = Reduce(rbind, list(HDD(auckland_weather), HDD(upperhutt_weather), HDD(christchurch_weather),
                               HDD(dunedin_weather), HDD(hamilton_weather), HDD(rotorua_weather), HDD(clyde_weather),
                               HDD(nelson_weather), HDD(palmerston_weather), HDD(stratford_weather), HDD(napier_weather),
-                              HDD(invercargill_weather)))
+                              HDD(invercargill_weather), HDD(gisborne_weather), HDD(greymouth_weather)))
 CDD_data = Reduce(rbind, list(CDD(auckland_weather), CDD(upperhutt_weather), CDD(christchurch_weather),
                               CDD(dunedin_weather), CDD(hamilton_weather), CDD(rotorua_weather), CDD(clyde_weather),
                               CDD(nelson_weather), CDD(palmerston_weather), CDD(stratford_weather), CDD(napier_weather),
-                              CDD(invercargill_weather)))
+                              CDD(invercargill_weather), CDD(gisborne_weather), CDD(greymouth_weather)))
 avg_temp_data = Reduce(rbind, list(avg_temp(auckland_weather), avg_temp(upperhutt_weather), avg_temp(christchurch_weather),
                                    avg_temp(dunedin_weather), avg_temp(hamilton_weather), avg_temp(rotorua_weather), avg_temp(clyde_weather),
                                    avg_temp(nelson_weather), avg_temp(palmerston_weather), avg_temp(stratford_weather), avg_temp(napier_weather),
-                                   avg_temp(invercargill_weather)))
+                                   avg_temp(invercargill_weather), avg_temp(gisborne_weather), avg_temp(greymouth_weather)))
 
 HDD_data$HDD = HDD_data$HDD/month_length
 CDD_data$CDD = CDD_data$CDD/month_length
@@ -93,6 +99,7 @@ region_pop = EV_data %>%
   group_by(weather_region) %>% 
   summarise(count =  n_distinct(vehicle)) %>% 
   arrange(-count)
+  
 model_pop = EV_data %>%
   group_by(model) %>% 
   summarise(count =  n_distinct(vehicle)) %>%
@@ -119,6 +126,6 @@ monthly_reg_EV_data = EV_data %>%
 
 
 
-save(EV_data, weather_regions,monthly_EV_data,monthly_reg_EV_data, model_pop,HDD_data,CDD_data, file = "processed_data/EV_weather_data.rda")
+save(EV_data, weather_regions,monthly_EV_data,monthly_reg_EV_data, model_pop,region_pop,HDD_data,CDD_data, file = "processed_data/EV_weather_data.rda")
 
 rm(list=ls())

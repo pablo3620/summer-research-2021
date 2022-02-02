@@ -12,8 +12,14 @@ vkt_yearly = cbind(vkt_yearly, vkt_other_yearly[,-1])
 vkt_yearly = subset(vkt_yearly, select = -c(Other.Regions))
 names(vkt_yearly)[1] = "year"
 
+#creates VKT of passenger vehicles
+#under the assumption that proportion of large vehicles and passenger vehicles is same in all regions
+vkt_pass = cbind(vkt_yearly$year,vkt_yearly[,-1]*(vkt_type_yearly$Light.passenger.vehicles/vkt_type_yearly$total))
+
 #list index (first) is the VKT region to use and value (second) is the weather data region to use
-vkt_regions = list("Northland" = "Auckland", "Auckland" = "Auckland", "Gisborne" = "Napier", "Hawes.Bay" = "Napier", "Taranaki" = "Stratford", "Manawatu.Wanganui" = "Palmerston North", "Wellington" = "Upper Hutt", "Nelson.Marlborough" = "Nelson", "Canterbury" = "Christchurch", "Southland" = "Invercargill", "Waikato" = "Hamilton", "Bay.of.Plenty" = "Rotorua", "West.Coast" = "Clyde", "Otago" = "Dunedin")
+vkt_regions = list("Northland" = "Auckland", "Auckland" = "Auckland", "Gisborne" = "Gisborne", "Hawkes.Bay" = "Napier", "Taranaki" = "Stratford", "Manawatu.Wanganui" = "Palmerston North", "Wellington" = "Upper Hutt", "Nelson.Marlborough" = "Nelson", "Canterbury" = "Christchurch", "Southland" = "Invercargill", "Waikato" = "Hamilton", "Bay.of.Plenty" = "Rotorua", "West.Coast" = "Greymouth Aero Ews", "Otago" = "Dunedin")
 
 
-save(vkt_quart, vkt_yearly, vkt_regions, file = "processed_data/VKT_data.rda")
+
+
+save(vkt_quart, vkt_yearly, vkt_regions, vkt_pass, file = "processed_data/VKT_data.rda")
