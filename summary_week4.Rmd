@@ -70,7 +70,7 @@ Power consumption (Wh/km) was calculated using the efficiency (km/kWh). This wil
 ## Results
 
 ```{r eff_plot}
-plot(monthly_EV_data$m, monthly_EV_data$mean_consum, type = 'l', xaxt = "n", xlab = "", ylab = "Mean consumption of EVs (kWh/km)", main = "Time series of EV consumption")
+plot(monthly_EV_data$m, monthly_EV_data$mean_consum, type = 'l', xaxt = "n", xlab = "", ylab = "Mean consumption of EVs (Wh/km)", main = "Time series of EV consumption")
 axis(1,labels = paste(monthly_EV_data$year, monthly_EV_data$month, sep = "-"), at = monthly_EV_data$m, las = 2,srt = 35)
 yearly_line()
 ```
@@ -91,13 +91,13 @@ Used 2 different methods of decomposition of the seasonal trend of consumption.
   \item Time series Decomposition
   \begin{itemize}
     \item designed for time series
-    \item automatically finds a overall trend based on the period to isolate the seasonal trend from
+    \item automatically finds an overall trend based on the recent average to isolate the seasonal trend from
     \item less sensitive to a large deviation (such as lockdown) as attributed to noise compared to linear model
     \item no confidence interval
   \end{itemize}
 \end{itemize}
 
-In the end seems better to use Time series Decomposition for overall efficiency trend but is still useful to see from the linear model without assuming any correlation between the months it still has very strong confidence intervals (p-value $< 2^{-16}$). Could be worth doing some more in depth using linear model and adding car as a factor.
+In the end seems better to use Time series Decomposition for overall consumption trend but is still useful to see from the linear model without assuming any correlation between the months it still has very strong confidence intervals (p-value $< 2^{-16}$). Could be worth doing some more in depth using linear model and adding car as a factor.
 
 
 
@@ -112,7 +112,7 @@ decomp_consum = monthly_EV_data$mean_consum %>%
 plot_decomp(decomp_consum, title = "Decomposition of Multiplicative Consumption Time Series", ylab = "Consumption")
 
 ```
-The decomposition shows that the seasonal trend goes from `r signif(min(decomp_consum$figure),2)` times the mean consumption in February to `r round(max(decomp_consum$figure),2)` times the mean consumption in March, A peak to peak difference of `r signif(abs(min(decomp_consum$figure)/max(decomp_consum$figure)-1)*100, 2)`\%. 
+The decomposition shows that the seasonal trend goes from `r signif(min(decomp_consum$figure),2)` times the mean consumption in February to `r round(max(decomp_consum$figure),2)` times the mean consumption in March, A peak to peak difference of `r  round(abs(max(decomp_consum$figure)/min(decomp_consum$figure)-1)*100, 1)`\%. 
 
 
 
@@ -145,21 +145,21 @@ Within Auckland looking at the plot it is very clear that HDD and consumption of
 monthly_reg_EV_data[monthly_reg_EV_data$weather_region == "Auckland",] %>%
   ggplot(aes(avg_temp, mean_consum)) + geom_point() + geom_smooth(method = 'loess') +
   ggtitle("Auckland Monthly Consumption by Temperature") +
-  labs(y="Monthly Average Consumption", x="Monthly Average Temperature")+
+  labs(y="Monthly Average Consumption (Wh/km)", x="Monthly Average Temperature (°C)")+
   theme_bw()
 ```
 
-Further looking into this we can see that in Auckland as the average temperature of the month starts increasing past 17.5 there appears to be a trend towards increasing EV consumption. As stated before research \cite{ev_range} suggested AC also increases consumption of the EV. This suggest it may be worth including cooling degree days and heating degree days in analysis. This could also be useful to explain the points well above the trend line that may be from a month where there was both cold and warm days contributing to a high usage of cabin temperature control increasing consumption but average temperature would not be able to show this. 
+Further looking into this we can see that in Auckland as the average temperature of the month starts increasing past 17.5°C there appears to be a trend towards increasing EV consumption. As stated before research \cite{ev_range} suggested AC also increases consumption of the EV. This suggest it may be worth including cooling degree days and heating degree days in analysis. This could also be useful to explain the points well above the trend line that may be from a month where there was both cold and warm days contributing to a high usage of cabin temperature control increasing consumption but average temperature would not be able to show this. 
 
 
 A linear model is used to model power consumption by HDD and CDD.
 
-As with the case of the adjusted monthly average power consumption (Wh/km) in the linear model a weighting is added to the points in order to give more weighting to cars with longer distance traveled. This may give a slightly bias towards EVs with proportionally higher highway mileage. However, from the electricity grids perspective it makes sense to give less weighting to cars that have traveled 0 or very low km. Mathematically this means instead of estimating the coefficients by minimizing the RSS given by the function $\sum_{i =1}^{n}(y_{i}-\hat{y}_{i})^2$ we minimize the function $\sum_{i =1}^{n}d \cdot(y_{i}-\hat{y}_{i})^2$ where $d$ is the distance traveled by a car in that month, $y_{i}$ is the actual power consumption, and $\hat{y}_{i}$ is the power consumption of that vehicle as predicted by the model.
+As with the case of the adjusted monthly average power consumption (Wh/km) in the linear model a weighting is added to the points in order to give more weighting to cars with longer distance traveled. This may give a slight bias towards EVs with proportionally higher highway mileage. However, from the electricity grids perspective it makes sense to give less weighting to cars that have traveled 0 or very low km. Mathematically this means instead of estimating the coefficients by minimizing the RSS given by the function $\sum_{i =1}^{n}(y_{i}-\hat{y}_{i})^2$ we minimize the function $\sum_{i =1}^{n}d \cdot(y_{i}-\hat{y}_{i})^2$ where $d$ is the distance traveled by a car in that month, $y_{i}$ is the actual power consumption, and $\hat{y}_{i}$ is the power consumption of that vehicle as predicted by the model.
 
 
-Power consumption is used in conjunction with a linear model as with the correct base temperature the usage of power to warm/cool the cabin should be roughly linear to the HDD/CDD \cite{HDD_est}. This would allow energy used to heat/cool the car to be isolated for analysis from drive train power consumption. Conceptually it makes sense that extra power usage due to heating/cooling demand to be independent from driven train demand as unlike in traditional internal combustion engine (ICE) vehicles where the energy to heat and cool the cabin comes from the engine a EVs heat pump and AC can draw power independently from the engine. Unfortunately, this linear correlation may break down as cars unlike houses or buildings are often only used at particular hours of the day for short period so this may break down or have more dependency towards the temperature at times such as the morning or evening commute hours.
+Power consumption is used in conjunction with a linear model as with the correct base temperature the usage of power to warm/cool the cabin should be roughly linear to the HDD/CDD \cite{HDD_est}. This would allow energy used to heat/cool the car to be isolated for analysis from drivetrain power consumption. Conceptually it makes sense that extra power usage due to heating/cooling demand to be independent from drivetrain demand as unlike in traditional internal combustion engine (ICE) vehicles where the energy to heat and cool the cabin comes from the engine, an EVs heat pump and AC can draw power independently from the engine. Unfortunately, this linear correlation may break down as cars unlike houses or buildings are often only used at particular hours of the day for short periods so this may break down or have more dependency towards the temperature at times such as the morning or evening commute hours.
 
-A different intercept is used for each model of car as a majority of the variation in efficiency will be due to different vehicle models, therefore, including the model allows for much better model fit and smaller confidence intervals. A different intercept is also used for each weather region as weather might be measured in a cold or hot section of region and also the region may have more or less hill/highway which could influence driving patterns impacting efficiency (for simplicity preferable if not included but model is much better fit if is included). However the Gradient of HDD term and CDD term is kept same for all regions and models as it this is the number we are trying to find to see how the number of HDD and CDD effect the efficiency of the EV. A baseline of Auckland and Nissan Leaf (24 kWh) 2013-2016 are used for the region and model as there is the most amount of data in them.
+A different intercept is used for each model of car as a majority of the variation in efficiency will be due to different vehicle models, therefore, including the vehicle model allows for much better model fit and smaller confidence intervals. A different intercept is also used for each weather region as weather might be measured in a cold or hot section of region and also the region may have more or less hill/highway which could influence driving patterns impacting efficiency (for simplicity preferable if not included but model is much better fit if is included). However the Gradient of HDD term and CDD term is kept same for all regions and models as this is the number we are trying to find to see how the number of HDD and CDD affect the efficiency of the EV. A baseline of Auckland and Nissan Leaf (24 kWh) 2013-2016 are used for the region and model as there is the most amount of data in them.
 
 
 
@@ -171,7 +171,7 @@ summary(eff_lm_model)
 
 The HDD term suggests that as the average number of heating degree days per days increases by 1 the average power consumption of EVs for the month increases by `r formatC(eff_lm_model$coefficients["HDD"], digits=3, format="fg", flag="#")`Wh/km. With a p-value of $<2\times10^{-16}$ we are quite confident on this value. 
 
-The CDD term suggests that as the average number of cooling degree days per days increases by 1 the average power consumption of EVs for the month increases by `r formatC(eff_lm_model$coefficients["CDD"], digits=3, format="fg", flag="#")`Wh/km. With a p-value of $3.11\times10^{-5}$ we are less confident on this value. This is likely as there is much less data in New Zealand regarding cooling degree days as NZ is a much cooler climate compared to where a lot of the other research on EVs is going on. 
+The CDD term suggests that as the average number of cooling degree days per days increases by 1 the average power consumption of EVs for the month increases by `r formatC(eff_lm_model$coefficients["CDD"], digits=3, format="fg", flag="#")`Wh/km. With a p-value of $4.11\times10^{-5}$ we are less confident on this value. This is likely as there is much less data in New Zealand regarding cooling degree days as NZ is a much cooler climate compared to where a lot of the other research on EVs is going on. 
 
 If we know that EVs have higher consumption in the winter due to heating requirements and to a much lesser extent in NZ higher consumption on warm days due to AC in order to see how this will affect the grid we need to see how this correlates with NZ populations driving pattern. 
 
@@ -191,7 +191,7 @@ For now I have 3 data sets regarding fuel usage
   \end{itemize}
 \end{itemize}
 
-As an initial analysis of the fuel usage in NZ I load the quarterly fuel trade data so that I can isolate only petrol usage in domestic land transport which should be a accurate representation of the fuel usage by light passenger vehicles. Will be just combining regular petrol and premium for analysis. (Premium used to be more popular. Was there a definition change on premium and regular used in the data?)
+As an initial analysis of the fuel usage in NZ I load the quarterly fuel trade data so that I can isolate only petrol usage in domestic land transport which should be an accurate representation of the fuel usage by light passenger vehicles. Will be just combining regular petrol and premium for analysis. (Premium used to be more popular. Was there a definition change on premium and regular used in the data?)
 
 
 
@@ -225,9 +225,9 @@ The time series decomposition of the NZ VKT data shows a clear seasonal trend, a
 \item Random variation in MIBE fuel trade data shows around a 3 times greater random variation. There could be a seasonal effect on fuel efficiency which could change seasonal fuel trend relative to VKT but there is no reason there would be any randomness in fuel efficiency so randomness should be of similar magnitude.
 \end{itemize}
 
-This smoothing likely occurs due to the method of data collection using the odometer readings during WoF/CoF. For a majority of vehicles WoF is only done 1 time a year and in the case of new cars that could be up to 3 years. This likely causes the data to show less seasonal trend than may exist in the real world.
+This smoothing likely occurs due to the method of data collection using the odometer readings during WoF/CoF. For a majority of vehicles WoF is only done once a year and in the case of new cars that could be up to 3 years. This likely causes the data to show less seasonal trend than may exist in the real world.
 
-Looking at the long term trend VKT remained largely flat between 2004 and 2012 after which there was a steady but significant in VKT until the drop off due to lockdown which in this data set for the above reasons likely started showing its effects in 2019. 
+Looking at the long term trend VKT remained largely flat between 2004 and 2012 after which there was a steady but significant increase until 2019. After which there is a decrease in VKT due to lockdown, which in this data set for the above reasons likely started showing its effects in 2019. 
 
 ```{r petrol_VKT_vs_eff}
 par(mar = c(4, 4, 2, 2))
@@ -244,7 +244,7 @@ points(c(2,5,8,11), decomp_vkt$figure, type = 'b', col = 3, xlab="", ylab="")
 legend("topleft", legend = c("EV consumption", "Petrol Usage", "NZTA VKT"), lty = 1,pch = 1, col = 1:3)
 ```
 
-Looking at the Seasonal trend of Petrol Usage and VKT data from NZTA we can see an obvious decrease in the winter months with a peak in the 4th quarter likely corresponding to holiday travel. Petrol Usage shows this variation to be much larger than the VKT data from NZTA. It is unclear whether this would be due to the smoothing effect as was previously discussed on the NZTA data or perhaps a change in efficiency for petrol vehicle by seasons similar to that of the EV. However if this was a seasonal effect it is odd that the increase in petrol usage occurs in 4th quarter rather than the 1st quarter, as the 1st quarter is generally warmer than the 4th quarter, as shown by the EV efficiency increasing more significantly in 1st quarter than 4th quarter. Combining these 2 data sets it is reasonable to suggest that in New Zealand, compared to the winter (Q1 and Q4) VKT, the true VKT in the summer (Q2 and Q3) is between `r round((mean(decomp_vkt$figure[c(4,1)])/mean(decomp_vkt$figure[2:3])-1)*100,1)`\% higher, as suggested by the VKT data from NZTA, to `r round((mean(decomp_petrol$figure[c(4,1)])/mean(decomp_petrol$figure[2:3])-1)*100,1)`\% higher, according to the petrol usage data.
+Looking at the Seasonal trend of Petrol Usage and VKT data from NZTA we can see an obvious decrease in the winter months with a peak in the 4th quarter likely corresponding to holiday travel. Petrol Usage shows this variation to be much larger than the VKT data from NZTA. It is unclear whether this would be due to the smoothing effect as was previously discussed on the NZTA data or perhaps a change in efficiency for petrol vehicle by seasons similar to that of the EV. However if this was a seasonal effect it is odd that the increase in petrol usage occurs in 4th quarter rather than the 1st quarter, as the 1st quarter is generally warmer than the 4th quarter, as shown by the EV efficiency increasing more significantly in 1st quarter than 4th quarter. Combining these 2 data sets it is reasonable to suggest that in New Zealand, compared to the winter (Q2 and Q3) VKT, the true VKT in the summer (Q1 and Q4) is between `r round((mean(decomp_vkt$figure[c(4,1)])/mean(decomp_vkt$figure[2:3])-1)*100,1)`\% higher, as suggested by the VKT data from NZTA, to `r round((mean(decomp_petrol$figure[c(4,1)])/mean(decomp_petrol$figure[2:3])-1)*100,1)`\% higher, according to the petrol usage data.
 
 Looking at the seasonal trend of EV consumption we can see much larger increase in consumption in the winter months with average consumption in July being `r round(abs(max(decomp_consum$figure)/min(decomp_consum$figure)-1)*100, 1)`\% higher consumption than in February. From the plot we can see that when consumption of EVs increases, VKT goes down, suggesting that some increase in total power usage due to EVs increase in consumption will be countered by the decrease in VKT. However, the increase in consumption is much larger than than the decrease in VKT. This combined with the fact that winter is when our electricity grid in New Zealand is already under strain due to heating demand suggests that if we ignore the relatively small change in VKT in our model we can effectively model a worst case scenario.
 
@@ -280,7 +280,8 @@ power_usage_prop %>%
   mutate(across(Region, fct_inorder)) %>% 
   ggplot(aes(x = month, y = value, color = Region, size = Region)) +
     scale_size_manual(values = c(rep(0.5,14), 1.5)) +
-    scale_color_manual(values = c(colorRampPalette(c("blue", "red", "green"))(14) ,1)) +
+    scale_color_manual(values = c(colorRampPalette(c("blue", "red", "green"))(14) ,1)) + 
+    scale_x_discrete(limits = month.abb) +
     ggtitle("Proportional Change in Total Power Usage for all NZ Regions") +
     ylab("Power Usage Proportional Change")+
     xlab("") +
@@ -290,20 +291,41 @@ power_usage_prop %>%
 
 ```{r}
 par(mar = c(4, 4, 2, 2))
-plot(limit_power_usage$total_best, type = 'b', main = "100% EV Case NZ Total Power Usage Best and Worst Case Cars", xaxt = "n", xlab = "", ylab = "Monthly Power Usage (GWh)", ylim = c(min(limit_power_usage$total_best), max(limit_power_usage$total_worst)), col = 4)
+plot(limit_power_usage$total_best, type = 'b', main = "100% EV Case NZ Total Power Usage Best and Worst Case Cars", xaxt = "n", xlab = "", ylab = "Monthly Power Usage (GWh)", ylim = c(0, max(limit_power_usage$total_worst)), col = 4)
 axis(1, labels = month.abb, at = 1:12, las = 3)
 
 points(1:12,limit_power_usage$total_worst, type = 'b',col = 2, xlab="", ylab="")
 
 points(1:12, power_usage$total_fit, type = 'b',col = 1, xlab="", ylab="")
 
-
-
 legend("bottomright", inset = c(0,0.2), legend = c("Hyundai Ioniq","Flip the fleet average", "Nissan Leaf (62 kWh)"), lty = 1, pch = 1, col = c(4,1,2))
 ```
 
+```{r}
+kea_power_usage[kea_power_usage$Region == "total",] %>% 
+  mutate(across(year, as.factor)) %>%
+  ggplot(aes(x = month, y = value, color = year)) +
+    scale_x_discrete(limits = month.abb) +
+    scale_size_manual(values = 10) +
+    ggtitle("Total NZ Power Usage per Month of EVs using EECAs Kea VKT and Flip the Fleets Consumption") +
+    ylab("Total NZ Power Usage per Month (GWh)")+
+    xlab("") +
+    geom_line() +
+    theme_bw()
+```
 
-
+```{r}
+tui_power_usage[kea_power_usage$Region == "total",] %>% 
+  mutate(across(year, as.factor)) %>%
+  ggplot(aes(x = month, y = value, color = year)) +
+    scale_x_discrete(limits = month.abb) +
+    scale_size_manual(values = 10) +
+    ggtitle("Total NZ Power Usage per Month of EVs using EECAs Tūī VKT and Flip the Fleets Consumption") +
+    ylab("Total NZ Power Usage per Month (GWh)")+
+    xlab("") +
+    geom_line() +
+    theme_bw()
+```
 
 \begin{thebibliography}{9}
 \bibitem{ev_range}
