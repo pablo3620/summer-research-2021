@@ -1,3 +1,5 @@
+library(dplyr)
+
 source("functions/power_usage_model.R")
 load("processed_data/EV_weather_data.rda")
 load("processed_data/VKT_data.rda")

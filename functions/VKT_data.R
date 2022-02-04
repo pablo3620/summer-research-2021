@@ -1,5 +1,4 @@
 library(dplyr)
-rm(list=ls())
 
 
 vkt_quart = read.csv("downloaded_stats/VKT_main_quart.csv")
@@ -24,4 +23,7 @@ times_tui = read.csv("downloaded_stats/times_tui_VKT.csv")
 
 
 save(vkt_quart, vkt_yearly, vkt_regions, vkt_pass,times_kea, times_tui, file = "processed_data/VKT_data.rda")
+
+rm(list=ls())
+
 

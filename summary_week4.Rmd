@@ -249,29 +249,7 @@ Looking at the Seasonal trend of Petrol Usage and VKT data from NZTA we can see 
 Looking at the seasonal trend of EV consumption we can see much larger increase in consumption in the winter months with average consumption in July being `r round(abs(max(decomp_consum$figure)/min(decomp_consum$figure)-1)*100, 1)`\% higher consumption than in February. From the plot we can see that when consumption of EVs increases, VKT goes down, suggesting that some increase in total power usage due to EVs increase in consumption will be countered by the decrease in VKT. However, the increase in consumption is much larger than than the decrease in VKT. This combined with the fact that winter is when our electricity grid in New Zealand is already under strain due to heating demand suggests that if we ignore the relatively small change in VKT in our model we can effectively model a worst case scenario.
 
 
-```{r}
-par(mar = c(4, 4, 2, 2))
-plot(power_usage$total_fit, type = 'b', main = "NZ 100% EV Case Total Power Usage per Month", xaxt = "n", xlab = "", ylab = "Monthly Power Usage (GWh)")
-axis(1, labels = month.abb, at = 1:12, las = 3)
-```
 
-```{r}
-par(mar = c(4, 4, 2, 2))
-
-plot(power_usage$Auckland_fit, type = 'b', main = "Auckland 100% EV Case Total Power Usage per Month", xaxt = "n",
-     xlab = "", ylab = "Monthly Power Usage (GWh)", ylim = c(min(power_usage[,4:6]),max(power_usage[,4:6])))
-axis(1, labels = month.abb, at = 1:12, las = 3)
-
-points(1:12,power_usage$Auckland_upr, type = 'l',lty = 2 , col = 2, xlab="", ylab="")
-
-Looking at the seasonal trend of EV consumption we can see much larger increase in consumption in the winter months with average consumption in July being `r round(abs(max(decomp_consum$figure)/min(decomp_consum$figure)-1)*100, 1)`\% higher consumption than in February. From the plot we can see that when consumption of EVs increases, VKT goes down, suggesting that some increase in total power usage due to EVs increase in consumption will be countered by the decrease in VKT. However, the increase in consumption is much larger than than the decrease in VKT. This combined with the fact that winter is when our electricity grid in New Zealand is already under strain due to heating demand suggests that if we ignore the relatively small change in VKT in our model we can effectively model a worst case scenario.
-
-
-```{r}
-par(mar = c(4, 4, 2, 2))
-plot(power_usage$total_fit, type = 'b', main = "NZ 100% EV Case Total Power Usage per Month", xaxt = "n", xlab = "", ylab = "Monthly Power Usage (GWh)")
-axis(1, labels = month.abb, at = 1:12, las = 3)
-```
 
 ```{r}
 par(mar = c(4, 4, 2, 2))
@@ -291,31 +269,14 @@ legend("topright", legend = c("fit", "upper estimate", "lower estimate"), lty = 
 
 
 ```{r}
-power_usage_prop %>%
-  tibble::rownames_to_column("month") %>% 
-  mutate(across(month, as.numeric)) %>% 
-  gather(key = "Region", value = value, -month) %>% 
-  mutate(across(Region, fct_inorder)) %>% 
-  ggplot(aes(x = month, y = value, color = Region, size = Region)) +
-    scale_size_manual(values = c(rep(0.5,14), 1.5)) +
-    scale_color_manual(values = c(colorRampPalette(c("blue", "red", "green"))(14) ,1)) +
-    ggtitle("Proportional Change in Total Power Usage for all NZ Regions") +
-    ylab("Power Usage Proportional Change")+
-    xlab("") +
-    geom_line() +
-    theme_bw()
-```
-
-```{r}
 par(mar = c(4, 4, 2, 2))
-plot(limit_power_usage$total_best, type = 'b', main = "NZ 100% EV Case Total Power Usage Best and Worst Case Cars", xaxt = "n", xlab = "", ylab = "Monthly Power Usage (GWh)", ylim = c(min(limit_power_usage$total_best), max(limit_power_usage$total_worst)), col = 4)
+plot(power_usage$total_fit, type = 'b', main = "NZ 100% EV Case Total Power Usage per Month", xaxt = "n", xlab = "", ylab = "Monthly Power Usage (GWh)")
 axis(1, labels = month.abb, at = 1:12, las = 3)
-
-legend("topright", legend = c("fit", "upper estimate", "lower estimate"), lty = c(1,2,2), col = 1:3)
 ```
 
-legend("right", legend = c("Hyundai Ioniq", "Nissan Leaf (62 kWh)"), lty = 1, pch = 1, col = c(4,2))
-```
+
+
+
 
 ```{r}
 power_usage_prop %>%
@@ -347,7 +308,7 @@ legend("bottomright", inset = c(0,0.2), legend = c("Hyundai Ioniq","Flip the fle
 ```
 
 ```{r}
-kea_power_usage[kea_power_usage$Region == "total",] %>% 
+kea_power_usage[kea_power_usage$Region == "total" & kea_power_usage$year %in% c(2018,2030,2040,2050,2060),] %>% 
   mutate(across(year, as.factor)) %>%
   ggplot(aes(x = month, y = value, color = year)) +
     scale_x_discrete(limits = month.abb) +
@@ -360,7 +321,7 @@ kea_power_usage[kea_power_usage$Region == "total",] %>%
 ```
 
 ```{r}
-tui_power_usage[kea_power_usage$Region == "total",] %>% 
+tui_power_usage[kea_power_usage$Region == "total" & kea_power_usage$year %in% c(2018,2030,2040,2050,2060),] %>% 
   mutate(across(year, as.factor)) %>%
   ggplot(aes(x = month, y = value, color = year)) +
     scale_x_discrete(limits = month.abb) +
