@@ -71,7 +71,7 @@ comb_vkt_consumption_weather = function(vkt_region, car_model = model_pop$freq[-
 # for running with the times model
 times_comb_vkt_consumption = function(est_tot_vkt, vkt_region, HDD = 0, CDD = 0, car_model = model_pop$freq[-1]) {
     #under assumtion that region km driven proportions do not change
-    vkt_prop = vkt_pass[vkt_yearly$year == 2019, vkt_region] / 12 / vkt_pass[vkt_yearly$year == 2019,"total"]
+    vkt_prop = vkt_pass[vkt_pass$year == 2019, vkt_region] / 12 / vkt_pass[vkt_pass$year == 2019,"total"]
     weather_region = vkt_regions[vkt_region]
     
     vkt = vkt_prop * est_tot_vkt
@@ -91,4 +91,18 @@ times_comb_vkt_consumption_weather = function(est_tot_vkt, vkt_region, car_model
   
   return(power_monthly)
 }
+
+
+# repeat of first few function for getting average consumption probably nicer if combine but not needed
+# commented out as not needed if only all of NZ average consumption needed. if regional average needed will needed
+
+#calc_region_consumption = function(vkt_region, HDD = 0, CDD = 0, car_model = model_pop$freq[-1]) {
+#  weather_region = vkt_regions[vkt_region]
+#  regionIndex = which(levels(EV_data$weather_region) == weather_region) - 1
+#  car_consumption = car_power_consumption(HDD, CDD, regionIndex, car_model)
+#  return(car_consumption)
+#}
+
+
+
 

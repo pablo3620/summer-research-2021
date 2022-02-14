@@ -41,21 +41,25 @@ rownames(limit_power_usage) = month.abb
 
 best_car = "Hyundai Ioniq (EV)"
 worst_car = "Nissan Leaf (62 kWh)"
-indexs = match(c(best_car, worst_car),model_pop$model)
+tesla_case = "Tesla Model S"
+indexs = match(c(best_car, worst_car, tesla_case),model_pop$model)
 for (vkt_reg in names(vkt_regions)) {
 
   current_best = comb_vkt_consumption_weather(vkt_reg, indexs[1]-1)
   current_worst = comb_vkt_consumption_weather(vkt_reg, indexs[2]-1)
+  current_telsa = comb_vkt_consumption_weather(vkt_reg, indexs[3]-1)
 
   
   colnames(current_best) = paste(vkt_reg, best_car, sep = "_")
   colnames(current_worst) = paste(vkt_reg, worst_car, sep = "_")
-  limit_power_usage = cbind(limit_power_usage, current_best, current_worst)
+  colnames(current_telsa) = paste(vkt_reg, tesla_case, sep = "_")
+  limit_power_usage = cbind(limit_power_usage, current_best, current_worst, current_telsa)
 }
 limit_power_usage = limit_power_usage[,-1]
 limit_power_usage = limit_power_usage[,seq(1, length(colnames(limit_power_usage)), by = 3)]
-limit_power_usage$total_best = rowSums(limit_power_usage[,seq(1, length(colnames(limit_power_usage)), by = 2)])
-limit_power_usage$total_worst = rowSums(limit_power_usage[,seq(2, length(colnames(limit_power_usage)), by = 2)])
+limit_power_usage$total_best = rowSums(limit_power_usage[,seq(1, length(colnames(limit_power_usage)), by = 3)])
+limit_power_usage$total_worst = rowSums(limit_power_usage[,seq(2, length(colnames(limit_power_usage)), by = 3)])
+limit_power_usage$tesla_s = rowSums(limit_power_usage[,seq(3, length(colnames(limit_power_usage)), by = 3)])
 
 
 #times model calculation
@@ -64,10 +68,10 @@ limit_power_usage$total_worst = rowSums(limit_power_usage[,seq(2, length(colname
 
 kea_power_usage = data.frame()
 
-for (i in 1:length(times_kea$year)) {
-  curr = data.frame(year = times_kea$year[i], month = 1:12)
+for (i in 1:length(times_kea_VKT$year)) {
+  curr = data.frame(year = times_kea_VKT$year[i], month = 1:12)
   for (vkt_reg in names(vkt_regions)) {
-    current = times_comb_vkt_consumption_weather(times_kea$Electricity[i], vkt_reg)
+    current = times_comb_vkt_consumption_weather(times_kea_VKT$Electricity[i], vkt_reg)
     colnames(current) = paste(vkt_reg, colnames(current), sep = "_")
     curr = cbind(curr, current)
 
@@ -84,10 +88,10 @@ for (i in 1:length(times_kea$year)) {
 
 tui_power_usage = data.frame()
 
-for (i in 1:length(times_tui$year)) {
-  curr = data.frame(year = times_tui$year[i], month = 1:12)
+for (i in 1:length(times_tui_VKT$year)) {
+  curr = data.frame(year = times_tui_VKT$year[i], month = 1:12)
   for (vkt_reg in names(vkt_regions)) {
-    current = times_comb_vkt_consumption_weather(times_tui$Electricity[i], vkt_reg)
+    current = times_comb_vkt_consumption_weather(times_tui_VKT$Electricity[i], vkt_reg)
     colnames(current) = paste(vkt_reg, colnames(current), sep = "_")
     curr = cbind(curr, current)
     
