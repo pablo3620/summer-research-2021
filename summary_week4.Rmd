@@ -263,7 +263,6 @@ points(1:12,power_usage$Auckland_upr, type = 'l',lty = 2 , col = 2, xlab="", yla
 points(1:12,power_usage$Auckland_lwr, type = 'l',lty = 2, col = 3, xlab="", ylab="")
 
 
-
 legend("topright", legend = c("fit", "upper estimate", "lower estimate"), lty = c(1,2,2), col = 1:3)
 ```
 
@@ -316,18 +315,37 @@ points(1:12, rep(times_tui_VKT$consumption[times_tui_VKT$year == 2060],12), type
 legend("bottomright", inset = c(0,0), legend = c("Hyundai Ioniq", "Flip the fleet average", "Nissan Leaf (62 kWh)","Tesla Model S", "Times Model 2018", "Times Model 2060"), lty = c(1,1,1,1,2,2), col = c(4,1,2,5,3,6))
 ```
 
+```{r}
+limit_power_usage %>% 
+  select(total_best,total_worst,tesla_s) %>% 
+  cbind("Flip the fleet average" = power_usage$total_fit) %>% 
+  rename("Hyundai Ioniq" = total_best, "Nissan Leaf (62 kWh)" = total_worst,"Tesla Model S" = tesla_s) %>% 
+  tibble::rownames_to_column("month") %>% 
+  mutate(across(month, as.numeric)) %>% 
+  gather(key = "Vehicle", value = value, -month) %>% 
+  ggplot(aes(x = month, y = value, color = Vehicle)) +
+    scale_x_discrete(limits = month.abb) +
+    ggtitle("100% EV Case NZ Total Power Usage Scenarios by Vehicle Model") +
+    ylab("Monthly Power Usage (GWh)") +
+    xlab("") +
+    geom_line() +
+    theme_bw()
+```
 
 
 ```{r}
 par(mar = c(4, 4, 2, 2))
-plot(limit_power_usage$total_best, type = 'b', main = "100% EV Case NZ Total Power Usage Best and Worst Case Cars", xaxt = "n", xlab = "", ylab = "Monthly Power Usage (GWh)", ylim = c(0, max(limit_power_usage$total_worst)), col = 4)
+plot(limit_power_usage$total_best, type = 'b', main = "100% EV Case NZ Total Power Usage Scenarios by Vehicle Model", xaxt = "n", xlab = "", ylab = "Monthly Power Usage (GWh)", ylim = c(250, max(limit_power_usage$tesla_s)), col = 4)
 axis(1, labels = month.abb, at = 1:12, las = 3)
 
 points(1:12,limit_power_usage$total_worst, type = 'b',col = 2, xlab="", ylab="")
 
 points(1:12, power_usage$total_fit, type = 'b',col = 1, xlab="", ylab="")
 
-legend("bottomright", inset = c(0,0.2), legend = c("Hyundai Ioniq","Flip the fleet average", "Nissan Leaf (62 kWh)"), lty = 1, pch = 1, col = c(4,1,2))
+points(1:12,limit_power_usage$tesla_s, type = 'b',col = 5, xlab="", ylab="")
+
+
+legend("bottomright", inset = c(0,0), legend = c("Tesla Model S","Nissan Leaf (62 kWh)", "Flip the fleet average","Hyundai Ioniq"), lty = 1, col = c(5,2,1,4))
 ```
 
 
@@ -337,7 +355,6 @@ kea_power_usage[kea_power_usage$Region == "total" & kea_power_usage$year %in% c(
   mutate(across(year, as.factor)) %>%
   ggplot(aes(x = month, y = value, color = year)) +
     scale_x_discrete(limits = month.abb) +
-    scale_size_manual(values = 10) +
     ggtitle("Total NZ Power Usage per Month of EVs using EECAs Kea VKT and Flip the Fleets Consumption") +
     ylab("Total NZ Power Usage per Month (GWh)")+
     xlab("") +

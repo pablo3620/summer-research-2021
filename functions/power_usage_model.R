@@ -59,7 +59,8 @@ comb_vkt_consumption_weather = function(vkt_region, car_model = model_pop$freq[-
         # cat(" ",i, " ", comb_vkt_consumption(vkt_region, HDD, CDD))
         power_monthly = rbind(power_monthly, comb_vkt_consumption(vkt_region, HDD, CDD, car_model))
     }
-    rownames(power_monthly) = month.abb[1:12]
+    #rownames(power_monthly) = month.abb[1:12]
+    rownames(power_monthly) = 1:12
     # colnames(vkt_monthly) = paste(colnames(vkt_monthly), "(GWh)")
     colnames(power_monthly) = paste(colnames(power_monthly))
 

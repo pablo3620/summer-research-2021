@@ -1,4 +1,4 @@
-library(dplyr)
+library(tidyr)
 
 source("functions/power_usage_model.R")
 load("processed_data/EV_weather_data.rda")
@@ -7,7 +7,6 @@ load("processed_data/VKT_data.rda")
 
 
 power_usage = data.frame(a = 1:12)
-rownames(power_usage) = month.abb[1:12]
 for (vkt_reg in names(vkt_regions)) {
   current = comb_vkt_consumption_weather(vkt_reg)
   colnames(current) = paste(vkt_reg, colnames(current), sep = "_")
@@ -17,7 +16,7 @@ power_usage = power_usage[,-1]
 
 power_usage$total_fit = rowSums(power_usage[,seq(1, length(colnames(power_usage)), by = 3)])
 power_usage$total_fit_consumption = power_usage$total_fit/(vkt_pass[vkt_pass$year == 2019, "total"]/12)
-rownames(power_usage) = month.abb
+#rownames(power_usage) = month.abb
 
 
 
@@ -40,7 +39,7 @@ power_usage_prop = power_usage_prop[,-1]
 
 #calculating best and worst case for different cars
 limit_power_usage = data.frame(a = 1:12)
-rownames(limit_power_usage) = month.abb
+#rownames(limit_power_usage) = month.abb
 
 best_car = "Hyundai Ioniq (EV)"
 worst_car = "Nissan Leaf (62 kWh)"
