@@ -295,30 +295,18 @@ power_usage_prop %>%
     theme_bw()
 ```
 
-```{r}
-kea_or_power_usage = read.csv('downloaded_stats/times_kea_energy_usage.csv')
-tui_or_power_usage = read.csv('downloaded_stats/times_tui_energy_usage.csv')
-
-#converting PJ to GWh and adding to VKT file
-times_kea_VKT$power_usage = kea_or_power_usage$Electricity/3.6*1000
-times_tui_VKT$power_usage = tui_or_power_usage$Electricity/3.6*1000
-
-times_kea_VKT$consumption = times_kea_VKT$power_usage/times_kea_VKT$Electricity 
-times_tui_VKT$consumption = times_tui_VKT$power_usage/times_tui_VKT$Electricity
-```
-
 
 ```{r}
 par(mar = c(4, 4, 2, 2))
-plot(limit_power_usage$total_best/(vkt_pass[vkt_pass$year == 2019, "total"]/12), type = 'b', main = "NZ Vehicle Average Consumption Scenarios", xaxt = "n", xlab = "", ylab = "EV Average Consumption (Wh/km)", ylim = c(0, 200), col = 4)
+plot(limit_power_usage$total_best_consumption, type = 'b', main = "NZ Vehicle Average Consumption Scenarios", xaxt = "n", xlab = "", ylab = "EV Average Consumption (Wh/km)", ylim = c(0, 210), col = 4)
 axis(1, labels = month.abb, at = 1:12, las = 3)
 
-points(1:12,limit_power_usage$total_worst/(vkt_pass[vkt_pass$year == 2019, "total"]/12), type = 'b',col = 2, xlab="", ylab="")
+points(1:12,limit_power_usage$total_worst_consumption, type = 'b',col = 2, xlab="", ylab="")
 
-points(1:12,limit_power_usage$tesla_s/(vkt_pass[vkt_pass$year == 2019, "total"]/12), type = 'b',col = 5, xlab="", ylab="")
+points(1:12,limit_power_usage$tesla_s_consumption, type = 'b',col = 5, xlab="", ylab="")
 
 
-points(1:12, power_usage$total_fit/(vkt_pass[vkt_pass$year == 2019, "total"]/12), type = 'b',col = 1, xlab="", ylab="")
+points(1:12, power_usage$total_fit_consumption, type = 'b',col = 1, xlab="", ylab="")
 
 points(1:12, rep(times_tui_VKT$consumption[times_tui_VKT$year == 2018],12), type = 'l',lty = 2, col = 3, xlab="", ylab="")
 

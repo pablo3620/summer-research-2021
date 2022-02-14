@@ -21,6 +21,16 @@ vkt_regions = list("Northland" = "Auckland", "Auckland" = "Auckland", "Gisborne"
 times_kea_VKT = read.csv("downloaded_stats/times_kea_VKT.csv")
 times_tui_VKT = read.csv("downloaded_stats/times_tui_VKT.csv")
 
+kea_or_power_usage = read.csv('downloaded_stats/times_kea_energy_usage.csv')
+tui_or_power_usage = read.csv('downloaded_stats/times_tui_energy_usage.csv')
+
+#converting PJ to GWh and adding to VKT file
+times_kea_VKT$power_usage = kea_or_power_usage$Electricity/3.6*1000
+times_tui_VKT$power_usage = tui_or_power_usage$Electricity/3.6*1000
+
+times_kea_VKT$consumption = times_kea_VKT$power_usage/times_kea_VKT$Electricity 
+times_tui_VKT$consumption = times_tui_VKT$power_usage/times_tui_VKT$Electricity
+
 
 save(vkt_quart, vkt_yearly, vkt_regions, vkt_pass,times_kea_VKT, times_tui_VKT, file = "processed_data/VKT_data.rda")
 

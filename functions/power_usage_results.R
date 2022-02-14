@@ -16,7 +16,10 @@ for (vkt_reg in names(vkt_regions)) {
 power_usage = power_usage[,-1]
 
 power_usage$total_fit = rowSums(power_usage[,seq(1, length(colnames(power_usage)), by = 3)])
+power_usage$total_fit_consumption = power_usage$total_fit/(vkt_pass[vkt_pass$year == 2019, "total"]/12)
 rownames(power_usage) = month.abb
+
+
 
 
 
@@ -60,6 +63,10 @@ limit_power_usage = limit_power_usage[,seq(1, length(colnames(limit_power_usage)
 limit_power_usage$total_best = rowSums(limit_power_usage[,seq(1, length(colnames(limit_power_usage)), by = 3)])
 limit_power_usage$total_worst = rowSums(limit_power_usage[,seq(2, length(colnames(limit_power_usage)), by = 3)])
 limit_power_usage$tesla_s = rowSums(limit_power_usage[,seq(3, length(colnames(limit_power_usage)), by = 3)])
+
+limit_power_usage$total_best_consumption = limit_power_usage$total_best/(vkt_pass[vkt_pass$year == 2019, "total"]/12)
+limit_power_usage$total_worst_consumption = limit_power_usage$total_worst/(vkt_pass[vkt_pass$year == 2019, "total"]/12)
+limit_power_usage$tesla_s_consumption = limit_power_usage$tesla_s/(vkt_pass[vkt_pass$year == 2019, "total"]/12)
 
 
 #times model calculation
