@@ -51,7 +51,7 @@ This projects aims to understand how current seasonal trends in driving behavior
 
 A variety of data sources were used. Distance traveled and vehicle efficiency (km/kWh) by month, as well as the region of the vehicle was collected from the on-board computers of `r length(unique(EV_data$vehicle))` vehicles between `r min(EV_data$year)` and `r max(EV_data$year)` as part of the 'Flip the Fleet' project. 
 
-Weather data was then collected from the NIWA national climate Database for `r length(unique(names(weather_regions)))` regions around New Zealand that best correspond to the regions of the vehicles. 
+Weather data was then collected from the NIWA national climate Database for `r length(levels(CDD_data$City))` regions around New Zealand that best correspond to the regions of the vehicles. 
 
 Fuel trade data including quarterly petrol usage for domestic transport in New Zealand is collected from the Ministry of Business, Innovation & Employment (MBIE).
 
@@ -205,9 +205,9 @@ decomp_petrol = fuel_trade$Petrol[fuel_trade$year < 2020] %>%
 plot_decomp(decomp_petrol, title = "Decomposition of Multiplicative Petrol Usage Time Series", ylab = "Fuel usage (L)")
 ```
 
-I excluded the fuel data from 2020 as lockdowns were not an accurate representation of the general driving patterns of the NZ population. Looking at the decomposition above there is a clear seasonal trend however it not that significant and is smaller than the larger deviations of the random variations.
+Fuel trade data from 2020 was excluded as lockdowns were not an accurate representation of the general driving patterns of the NZ population. Looking at the decomposition above there is a clear seasonal trend however it not that significant and is smaller than the larger deviations of the random variations.
 
-We can also compare this to the VKT data from NZTA. This data was given by Haobo Wang from NZTA and is collected using VKT based on WoF/CoF odometer \cite{NZTA_VKT}. 
+Fuel trade data can be compared to the VKT data from NZTA. This data was given by Haobo Wang from NZTA and is collected using VKT based on WoF/CoF odometer \cite{NZTA_VKT}. 
 
 ```{r VKT_ts, warning=FALSE, message=FALSE}
 decomp_vkt = vkt_quart[vkt_quart$year >= 2003,]$total %>% 
@@ -248,13 +248,20 @@ Looking at the Seasonal trend of Petrol Usage and VKT data from NZTA we can see 
 
 Looking at the seasonal trend of EV consumption we can see much larger increase in consumption in the winter months with average consumption in July being `r round(abs(max(decomp_consum$figure)/min(decomp_consum$figure)-1)*100, 1)`\% higher consumption than in February. From the plot we can see that when consumption of EVs increases, VKT goes down, suggesting that some increase in total power usage due to EVs increase in consumption will be countered by the decrease in VKT. However, the increase in consumption is much larger than than the decrease in VKT. This combined with the fact that winter is when our electricity grid in New Zealand is already under strain due to heating demand suggests that if we ignore the relatively small change in VKT in our model we can effectively model a worst case scenario.
 
+In order to predict the the effect that EVs will have on New Zealands electricity grid the yearly regional VKT data from 2019 in used in conjunction with the consumption linear model from above, with weather data from 2017 to 2021 matched to the best corresponding VKT regions and the vehicle model make up of the Flip the Fleet data. 
 
-
+Assumptions made are therefore,
+\begin{itemize}
+\item Regional VKT data remains relatively consistent with 2019 VKT data. 2019 is chosen as in NZ there has been a significant increase in VKT in recent years excluding 2020 as there was a significant decrease due to lockdown. As lockdown is an outlier event it would be preferable to not include this in the model so 2019 is used.
+\item Regional weather data from 2017 to 2021 remains consistent with future climate of NZ.
+\item Flip the Fleet's fleet is representative NZs future EV fleet.
+\item Actual VKT of each region remains relatively constant throughout the year.
+\end{itemize}
 
 ```{r}
 par(mar = c(4, 4, 2, 2))
 
-plot(power_usage$Auckland_fit, type = 'b', main = "Auckland 100% EV Case Total Power Usage per Month", xaxt = "n",
+plot(power_usage$Auckland_fit, type = 'b', main = "Auckland Reigion 100% EV Case Total Power Usage per Month", xaxt = "n",
      xlab = "", ylab = "Monthly Power Usage (GWh)", ylim = c(min(power_usage[,4:6]),max(power_usage[,4:6])))
 axis(1, labels = month.abb, at = 1:12, las = 3)
 
@@ -265,6 +272,8 @@ points(1:12,power_usage$Auckland_lwr, type = 'l',lty = 2, col = 3, xlab="", ylab
 
 legend("topright", legend = c("fit", "upper estimate", "lower estimate"), lty = c(1,2,2), col = 1:3)
 ```
+Combining Auckland only VKT with the consumption linear model we can see the 
+
 
 
 ```{r}
@@ -333,7 +342,7 @@ limit_power_usage %>%
 ```
 
 
-```{r}
+```{r eval=FALSE}
 par(mar = c(4, 4, 2, 2))
 plot(limit_power_usage$total_best, type = 'b', main = "100% EV Case NZ Total Power Usage Scenarios by Vehicle Model", xaxt = "n", xlab = "", ylab = "Monthly Power Usage (GWh)", ylim = c(250, max(limit_power_usage$tesla_s)), col = 4)
 axis(1, labels = month.abb, at = 1:12, las = 3)
