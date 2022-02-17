@@ -7,11 +7,12 @@ plot_decomp = function(decomp, title = "Decomposition of Time Series", xlab = "Y
   
   plot = ggplot(gather(dat, component, value, -Time), aes(Time, value)) +
     facet_grid(component ~ ., scales="free_y") +
+    scale_x_continuous(n.breaks = breaks) +
     geom_line() +
     labs(y=ylab, x=xlab) +
-    ggtitle(title)+
+#    ggtitle(title)+
     theme(plot.title=element_text(hjust=0.5)) +
-    theme_bw() +
-    scale_x_continuous(n.breaks = breaks)
+    gg_theme
+    
   return(plot)
 }
