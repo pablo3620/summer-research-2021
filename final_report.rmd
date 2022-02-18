@@ -1,0 +1,69 @@
+---
+title: "Exploring the seasonal variation in electric vehicle charging in New Zealand"
+author: "Pablo Paulsen"
+date: "02/18/2022"
+output:
+  pdf_document:
+    fig_caption: yes
+    keep_tex: yes
+header-includes: 
+ - \usepackage{float}
+ - \floatplacement{figure}{H}
+ - \usepackage{comment}
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = F)
+knitr::opts_chunk$set(fig.width=9, fig.height=5) 
+#knitr::opts_chunk$set(fig.pos = 'H')
+library(tidyverse)
+library(quantmod)
+library(forecast)
+library(tseries)
+library(knitr)
+rm(list=ls())
+```
+
+```{r functions, include = FALSE}
+source("functions/yearly_line.R")
+source("functions/plot_ts_decomp.R")
+```
+
+
+```{r graph_option, include = FALSE}
+#ggplot styling
+gg_theme = theme_bw(base_size = 14)
+gg_color_palette = scale_color_brewer(palette = "Set1")
+
+#base r stylings
+legend_inset = c(0.020, 0.036)
+```
+
+```{r ev_data_setup, message = FALSE}
+load("processed_data/EV_weather_data.rda")
+#attach(EV_data)
+```
+
+```{r fuel_data, message = FALSE}
+#MBIE quaterly fuel usage data
+fuel_trade = read.csv("downloaded_stats/fuel_trade.csv", header = T)
+fuel_trade$qart = fuel_trade$month/3
+```
+
+```{r VKT_data, message = FALSE}
+load("processed_data/VKT_data.rda")
+```
+
+```{r model_results, message = FALSE}
+load("processed_data/power_usage.rda")
+```
+
+## Data Exploration 
+
+
+```{r eff_plot, fig.cap="Time Series of EV Consumption"}
+plot(monthly_EV_data$m, monthly_EV_data$mean_consum, type = 'l', xaxt = "n", xlab = "", ylab = "Mean consumption of EVs (Wh/km)", las = 1)
+axis(1,labels = paste(monthly_EV_data$year, monthly_EV_data$month, sep = "-"), at = monthly_EV_data$m, las = 2,srt = 35)
+yearly_line()
+```
