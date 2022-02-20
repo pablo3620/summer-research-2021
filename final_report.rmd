@@ -61,9 +61,17 @@ load("processed_data/power_usage.rda")
 
 ## Data Exploration 
 
+Distance traveled and vehicle efficiency (km/kWh) by month, as well as the region of the vehicle was collected from the on-board computers of `r length(unique(EV_data$vehicle))` vehicles between `r min(EV_data$year)` and `r max(EV_data$year)` as part of the 'Flip the Fleet' project. 
 
-```{r eff_plot, fig.cap="Time Series of EV Consumption"}
-plot(monthly_EV_data$m, monthly_EV_data$mean_consum, type = 'l', xaxt = "n", xlab = "", ylab = "Mean consumption of EVs (Wh/km)", las = 1)
+A monthly weighted average was calculated for the whole of New Zealand and then for each region of NZ. The monthly averages were weighted using the distance traveled to give more weighting to vehicles with higher km traveled in that month. this was done using the formula $$\bar{x} = \frac{\sum_{i}^{n} (d_i\times x_i)}{\left(\sum_{i}^{n} d_i\right)\times n}$$
+
+Power consumption (Wh/km) was calculated using the efficiency (km/kWh). This will be used instead of efficiency in the modeling for reasons that will become apparent later in the analysis. 
+
+```{r eff_plot, fig.cap="Time series of EVs weighted mean consumption using Flip the Fleet data for all NZ regions"}
+plot(monthly_EV_data$m, monthly_EV_data$mean_consum, type = 'l', xaxt = "n", xlab = "", ylab = "Consumption of EVs (Wh/km)", las = 1)
 axis(1,labels = paste(monthly_EV_data$year, monthly_EV_data$month, sep = "-"), at = monthly_EV_data$m, las = 2,srt = 35)
 yearly_line()
 ```
+
+
+

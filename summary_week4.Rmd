@@ -82,7 +82,7 @@ The HDD and CDD was then divided by the length of the month so that HDD and CDD 
 The calculated monthly weather statistics by region was then added to the monthly EV data based on the regions of vehicle. This assumes that vehicle stays in it's own region for a majority of the time. 
 
 
-A monthly adjusted average was calculated for the whole of New Zealand and then for each region of NZ. The monthly averages were adjusted by weighting using the distance traveled to give more weighting to vehicles with higher km traveled in that month. this was done using the formula $$\bar{x} = \frac{\sum_{i}^{n} (d_i\times x_i)}{\left(\sum_{i}^{n} d_i\right)\times n}$$
+A monthly weighted average was calculated for the whole of New Zealand and then for each region of NZ. The monthly averages were weighted using the distance traveled to give more weighting to vehicles with higher km traveled in that month. this was done using the formula $$\bar{x} = \frac{\sum_{i}^{n} (d_i\times x_i)}{\left(\sum_{i}^{n} d_i\right)\times n}$$
 
 Power consumption (Wh/km) was calculated using the efficiency (km/kWh). This will be used instead of efficiency in the modeling for reasons that will become apparent later in the analysis. 
 
