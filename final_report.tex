@@ -77,6 +77,10 @@ New Zealand}
 \hypertarget{data-exploration}{%
 \subsection{Data Exploration}\label{data-exploration}}
 
+\hypertarget{flip-the-fleet-data-exploration}{%
+\subsubsection{Flip the Fleet Data
+Exploration}\label{flip-the-fleet-data-exploration}}
+
 Distance traveled and vehicle efficiency (km/kWh) by month, as well as
 the region of the vehicle was collected from the on-board computers of
 1259 vehicles between 2017 and 2021 as part of the `Flip the Fleet'
@@ -133,7 +137,8 @@ majority of the seasonal variation in EV efficiency is due to cabin
 temperature control\cite{ev_range}. Using the regional hourly
 temperatures, monthly heating degree days (HDD) and cooling degree days
 (CDD) were imputed using base temperatures of 16\(^\circ\)C and
-22\(^\circ\)C respectively.
+22\(^\circ\)C respectively. Monthly average temperature was also
+calculated.
 
 The HDD and CDD was then divided by the length of the month so that HDD
 and CDD corresponds to average heating degrees days per day for the
@@ -147,9 +152,85 @@ vehicle stays in it's own region for a majority of the time.
 
 \begin{figure}
 \centering
-\includegraphics{final_report_files/figure-latex/eff_HDD_plot-1.pdf}
-\caption{Auckland Seasonal component
-Decompostions\label{fig:eff_HDD_plot}}
+\includegraphics{final_report_files/figure-latex/consum_HDD_plot-1.pdf}
+\caption{Auckland seasonal HDD and EV Consumption
+decompostions\label{fig:consum_HDD_plot}}
 \end{figure}
+
+Auckland is used as an example to compare correlation between HDD and
+consumption as it has the largest amount of data and is of most interest
+to Vector. Within Auckland Figure \ref{fig:consum_HDD_plot} shows very
+clearly that HDD and consumption of EVs are highly correlated. There is
+a slight increase in consumption in January and February and it can be
+questioned if that is due to AC usage which would decrease range
+\cite{ev_range} or other factors such as holiday travel which could
+involve highway driving which EVs are generally less efficient at
+\cite{ev_highway}. This effect is not obvious in the overall trend this
+could be as Auckland for the most part is a warmer climate than the rest
+of NZ.
+
+\begin{figure}
+\centering
+\includegraphics{final_report_files/figure-latex/temp_consum_plot-1.pdf}
+\caption{Auckland monthly average consumption by avg
+temperature\label{fig:temp_consum_plot}}
+\end{figure}
+
+Further looking into Auckland consumption by weather Figure
+\ref{fig:temp_consum_plot} shows a decreasing consumption up to around a
+monthly average temperature of 17.5°C. However, increasing monthly
+average temperature past this there appears to be a trend towards
+increasing EV consumption.As stated previously research \cite{ev_range}
+suggested AC also increases consumption of the EV. This suggest it may
+be worth including cooling degree days and heating degree days in
+analysis. This could also be useful to explain the points well above the
+trend line that may be from a month where there was both cold and warm
+days contributing to a high usage of cabin temperature control
+increasing consumption but average temperature would not be able to show
+this.
+
+\hypertarget{nz-vkt-data-exploration}{%
+\subsubsection{NZ VKT Data Exploration}\label{nz-vkt-data-exploration}}
+
+If we know EV consumption has a seasonal trend in order to see how this
+will affect the grid we need to see how this correlates with NZ
+populations driving pattern.
+
+To find if a seasonal trend in fuel usage in NZ fuel trade data
+\cite{fuel_trade} from the Ministry of Business, Innovation and
+Employment (MBIE) is used. This data set quarterly data in broken down
+by fuel type and sector. This allows the isolation of petrol usage in
+domestic land transport which should be an accurate representation of
+the fuel usage by light passenger vehicles.
+
+\begin{figure}
+\centering
+\includegraphics{final_report_files/figure-latex/petrol_ts-1.pdf}
+\caption{Decomposition of Multiplicative Petrol Usage Time Series}
+\end{figure}
+
+\hypertarget{model}{%
+\subsection{Model}\label{model}}
+
+\begin{thebibliography}{9}
+\bibitem{ev_range}
+\textit{To what degree does temperature impact EV range?}
+\\\texttt{\url{https://www.geotab.com/blog/ev-range/}}
+\bibitem{ev_highway}
+\textit{Why is the range of an EV less on the freeway than the city?}
+\\\texttt{\url{https://evcentral.com.au/why-is-the-range-of-an-ev-less-on-the-freeway-than-the-city/}}
+\bibitem{fuel_trade}
+\textit{MBIE oil trade statistics}
+\\\texttt{\url{https://www.mbie.govt.nz/building-and-energy/energy-and-natural-resources/energy-statistics-and-modelling/energy-statistics/oil-statistics/}}
+\bibitem{HDD_est}
+\textit{Bayesian estimation of a building's base temperature for the calculation of heating degree-days}
+\\\texttt{\url{https://www.sciencedirect.com/science/article/abs/pii/S0378778816312907}}
+\bibitem{NZTA_VKT}
+\textit{NZTA VKT data website}
+\\\texttt{\url{https://www.transport.govt.nz/statistics-and-insights/fleet-statistics/vehicle-kms-travelled-vkt-2/}}
+\bibitem{times_model}
+\textit{ECCA Times Model}
+\\\texttt{\url{https://www.eeca.govt.nz/insights/data-tools/new-zealand-energy-scenarios-times-nz/}}
+\end{thebibliography}
 
 \end{document}

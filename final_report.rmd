@@ -61,6 +61,8 @@ load("processed_data/power_usage.rda")
 
 ## Data Exploration 
 
+### Flip the Fleet Data Exploration
+
 Distance traveled and vehicle efficiency (km/kWh) by month, as well as the region of the vehicle was collected from the on-board computers of `r length(unique(EV_data$vehicle))` vehicles between `r min(EV_data$year)` and `r max(EV_data$year)` as part of the 'Flip the Fleet' project. 
 
 A monthly weighted average was calculated for the whole of New Zealand and then for each region of NZ. The monthly averages were weighted using the distance traveled to give more weighting to vehicles with higher km traveled in that month. this was done using the formula $$\bar{x} = \frac{\sum_{i}^{n} (d_i\times x_i)}{\left(\sum_{i}^{n} d_i\right)\times n}$$
@@ -80,7 +82,7 @@ Figure \ref{consum_plot} shows there is a clear seasonal trend in the monthly av
 A time series Decomposition is used to isolated the seasonal trend in consumption from the overall trend. This can be done for all regions of NZ combined and also for each region independently. 
 
 
-```{r consum_decomp_plot, fig.cap = "Multiplicative Time Series Decomposition of Flip the Fleet Average Consumption for all of NZ\\label{fig:consum_decomp_plot}", message = FALSE, warning = FALSE, fig.height = 6}
+```{r consum_decomp_plot, fig.cap = "Multiplicative time series decomposition of flip the fleet average consumption for all of NZ\\label{fig:consum_decomp_plot}", message = FALSE, warning = FALSE, fig.height = 6}
 decomp_consum = monthly_EV_data$mean_consum %>% 
   ts(frequency = 12, start = 2017) %>% 
   decompose("multiplicative")
@@ -94,14 +96,14 @@ The time series decomposition (Figure \ref{fig:consum_decomp_plot}) shows a very
 <!-- may add reference of linking range to temp if not mentioned in the intro -->
 As NZ weather differs significantly by region, to test the hypothesis that EV consumption is correlated with heating degree days we must limit the comparison to a single region of Flip the Fleet data and compare it to that regions weather at the same period of time. 
 
-In order to do this hourly weather data from 2017 to 2021 was collected from the NIWA national climate Database for `r length(levels(CDD_data$City))` regions around New Zealand that best correspond to the regions of the Flip the Fleet vehicles. The base temperatures were selected to represent the range of comfortable temperatures for most people, as research shows that a majority of the seasonal variation in EV efficiency is due to cabin temperature control\cite{ev_range}. Using the regional hourly temperatures, monthly heating degree days (HDD) and cooling degree days (CDD) were imputed using base temperatures of 16$^\circ$C and 22$^\circ$C respectively. 
+In order to do this hourly weather data from 2017 to 2021 was collected from the NIWA national climate Database for `r length(levels(CDD_data$City))` regions around New Zealand that best correspond to the regions of the Flip the Fleet vehicles. The base temperatures were selected to represent the range of comfortable temperatures for most people, as research shows that a majority of the seasonal variation in EV efficiency is due to cabin temperature control\cite{ev_range}. Using the regional hourly temperatures, monthly heating degree days (HDD) and cooling degree days (CDD) were imputed using base temperatures of 16$^\circ$C and 22$^\circ$C respectively. Monthly average temperature was also calculated.
 
 The HDD and CDD was then divided by the length of the month so that HDD and CDD corresponds to average heating degrees days per day for the month. This is so that when comparing to other statistics such as efficiency that are averaged out rather than summed so there is less bias.
 
 The calculated monthly weather statistics by region was then added to the monthly EV data based on the regions of vehicle. This assumes that vehicle stays in it's own region for a majority of the time. 
 
 
-```{r eff_HDD_plot, fig.cap = "Auckland seasonal HDD and EV Consumption decompostions\\label{fig:eff_HDD_plot}", warning = FALSE}
+```{r consum_HDD_plot, fig.cap = "Auckland seasonal HDD and EV Consumption decompostions\\label{fig:consum_HDD_plot}", warning = FALSE}
 auck_consum_series = ts(monthly_reg_EV_data$mean_consum[which(monthly_reg_EV_data$weather_region == "Auckland")], frequency = 12)
 decomp_auck_consum = decompose(auck_consum_series,"multiplicative")
 auck_HDD_series = ts(monthly_reg_EV_data$HDD[monthly_reg_EV_data$weather_region == "Auckland"], frequency = 12)
@@ -121,6 +123,56 @@ legend("topright", inset = legend_inset, legend = c("EV Consumption", "HDD"), lt
 ```
 
 
+Auckland is used as an example to compare correlation between HDD and consumption as it has the largest amount of data and is of most interest to Vector. Within Auckland Figure \ref{fig:consum_HDD_plot} shows very clearly that HDD and consumption of EVs are highly correlated. There is a slight increase in consumption in January and February and it can be questioned if that is due to AC usage which would decrease range \cite{ev_range} or other factors such as holiday travel which could involve highway driving which EVs are generally less efficient at \cite{ev_highway}. This effect is not obvious in the overall trend this could be as Auckland for the most part is a warmer climate than the rest of NZ.
+
+
+```{r temp_consum_plot, fig.cap = "Auckland monthly average consumption by avg temperature\\label{fig:temp_consum_plot}", message=FALSE}
+monthly_reg_EV_data[monthly_reg_EV_data$weather_region == "Auckland",] %>%
+  ggplot(aes(avg_temp, mean_consum)) +
+    labs(y="Monthly Average Consumption (Wh/km)", x="Monthly Average Temperature (°C)") +
+    geom_smooth(method = 'loess') +
+    geom_point() +
+    gg_theme
+```
+
+
+Further looking into Auckland consumption by weather Figure \ref{fig:temp_consum_plot} shows a decreasing consumption up to around a monthly average temperature of 17.5°C. However, increasing monthly average temperature past this there appears to be a trend towards increasing EV consumption.As stated previously research \cite{ev_range} suggested AC also increases consumption of the EV. This suggest it may be worth including cooling degree days and heating degree days in analysis. This could also be useful to explain the points well above the trend line that may be from a month where there was both cold and warm days contributing to a high usage of cabin temperature control increasing consumption but average temperature would not be able to show this. 
+
+
+### NZ VKT Data Exploration
+
+If we know EV consumption has a seasonal trend in order to see how this will affect the grid we need to see how this correlates with NZ populations driving pattern. 
+
+
+<!-- should i include info on fuel data collected? -->
+
+<!-- 3 fuel usage data sets were collected to analyze the fuel usage trend. -->
+<!-- \begin{itemize} -->
+<!--   \item monthly card sales data  -->
+<!--   \begin{itemize} -->
+<!--     \item monthly data for all of NZ credit card transactions at fuel stations -->
+<!--   \end{itemize} -->
+<!--   \item quarterly regional fuel sales data -->
+<!--   \begin{itemize} -->
+<!--     \item quarterly data for all sales at fuel stations broken down by region from MBIE -->
+<!--   \end{itemize} -->
+<!--   \item quarterly fuel trade data -->
+<!--     \begin{itemize} -->
+<!--     \item quarterly data of fuel used for transport by type of fuel -->
+<!--   \end{itemize} -->
+<!-- \end{itemize} -->
+
+To find if a seasonal trend in fuel usage in NZ fuel trade data \cite{fuel_trade} from the Ministry of Business, Innovation and Employment (MBIE) is used. This data set quarterly data in broken down by fuel type and sector. This allows the isolation of petrol usage in domestic land transport which should be an accurate representation of the fuel usage by light passenger vehicles.
+
+```{r petrol_ts, fig.cap="Multiplicative time series decomposition of petrol usage in domestic land transport", warning=FALSE, message=FALSE, fig.height=6}
+decomp_petrol = fuel_trade$Petrol[fuel_trade$year < 2020] %>% 
+  ts(frequency = 4, start = min(fuel_trade$year)) %>% 
+  decompose("multiplicative")
+  
+plot_decomp(decomp_petrol, ylab = "Fuel usage (L)")
+```
+
+## Model
 
 
 
@@ -129,6 +181,27 @@ legend("topright", inset = legend_inset, legend = c("EV Consumption", "HDD"), lt
 
 
 
+
+\begin{thebibliography}{9}
+\bibitem{ev_range}
+\textit{To what degree does temperature impact EV range?}
+\\\texttt{\url{https://www.geotab.com/blog/ev-range/}}
+\bibitem{ev_highway}
+\textit{Why is the range of an EV less on the freeway than the city?}
+\\\texttt{\url{https://evcentral.com.au/why-is-the-range-of-an-ev-less-on-the-freeway-than-the-city/}}
+\bibitem{fuel_trade}
+\textit{MBIE oil trade statistics}
+\\\texttt{\url{https://www.mbie.govt.nz/building-and-energy/energy-and-natural-resources/energy-statistics-and-modelling/energy-statistics/oil-statistics/}}
+\bibitem{HDD_est}
+\textit{Bayesian estimation of a building's base temperature for the calculation of heating degree-days}
+\\\texttt{\url{https://www.sciencedirect.com/science/article/abs/pii/S0378778816312907}}
+\bibitem{NZTA_VKT}
+\textit{NZTA VKT data website}
+\\\texttt{\url{https://www.transport.govt.nz/statistics-and-insights/fleet-statistics/vehicle-kms-travelled-vkt-2/}}
+\bibitem{times_model}
+\textit{ECCA Times Model}
+\\\texttt{\url{https://www.eeca.govt.nz/insights/data-tools/new-zealand-energy-scenarios-times-nz/}}
+\end{thebibliography}
 
 
 
