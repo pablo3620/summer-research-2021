@@ -6,11 +6,10 @@ output:
   pdf_document:
     fig_caption: yes
     keep_tex: yes
-header-includes: 
- - \usepackage{float}
- - \floatplacement{figure}{H}
- - \usepackage{comment}
-
+header-includes:
+- \usepackage{float}
+- \floatplacement{figure}{H}
+- \usepackage{comment}
 ---
 
 ```{r setup, include=FALSE}
@@ -18,8 +17,6 @@ knitr::opts_chunk$set(echo = F)
 knitr::opts_chunk$set(fig.width=9, fig.height=5) 
 #knitr::opts_chunk$set(fig.pos = 'H')
 library(tidyverse)
-library(quantmod)
-library(forecast)
 library(tseries)
 library(knitr)
 rm(list=ls())
@@ -162,15 +159,20 @@ If we know EV consumption has a seasonal trend in order to see how this will aff
 <!--   \end{itemize} -->
 <!-- \end{itemize} -->
 
-To find if a seasonal trend in fuel usage in NZ fuel trade data \cite{fuel_trade} from the Ministry of Business, Innovation and Employment (MBIE) is used. This data set quarterly data in broken down by fuel type and sector. This allows the isolation of petrol usage in domestic land transport which should be an accurate representation of the fuel usage by light passenger vehicles.
+To find if a seasonal trend in fuel usage in NZ fuel trade data \cite{fuel_trade} from the Ministry of Business, Innovation and Employment (MBIE) is used. This data set quarterly data in broken down by fuel type and sector. This allows the isolation of petrol usage in domestic land transport which should be an accurate representation of the fuel usage by light passenger vehicles. Fuel trade data from 2020 was excluded as lockdowns were not an accurate representation of the general driving patterns of the NZ population.
 
-```{r petrol_ts, fig.cap="Multiplicative time series decomposition of petrol usage in domestic land transport", warning=FALSE, message=FALSE, fig.height=6}
+
+```{r petrol_ts, fig.cap="Multiplicative time series decomposition of petrol usage in domestic land transport\\label{fig:petrol_ts}", warning=FALSE, message=FALSE, fig.height=6}
 decomp_petrol = fuel_trade$Petrol[fuel_trade$year < 2020] %>% 
   ts(frequency = 4, start = min(fuel_trade$year)) %>% 
   decompose("multiplicative")
   
 plot_decomp(decomp_petrol, ylab = "Fuel usage (L)")
 ```
+
+
+Figure \ref{fig:petrol_ts} decomposition shows a seasonal trend, however, it is of relatively small magnitude compared to the random variations suggesting this trend may not be significant.
+
 
 ## Model
 
