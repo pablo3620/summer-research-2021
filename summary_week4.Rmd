@@ -239,7 +239,7 @@ decomp_petrol = fuel_trade$Petrol[fuel_trade$year < 2020] %>%
 plot_decomp(decomp_petrol, ylab = "Fuel usage (L)")
 ```
 ```{r}
-acf(decomp_petrol$x)
+acf(decomp_petrol$x-min(decomp_petrol$x))
 ```
 
 
@@ -278,8 +278,6 @@ plot(decomp_consum$figure, type = 'b', xaxt = "n",
 axis(1, labels = month.abb, at = 1:12, las = 1)
 
 points(unique(fuel_trade$month)-1,decomp_petrol$figure, type = 'b', col = 2, xlab="", ylab="")
-#mtext("Change in Petrol usage",side=4,line=2, cex = 1, col = 2) 
-#axis(4, col = 2)
 
 points(c(2,5,8,11), decomp_vkt$figure, type = 'b', col = 3, xlab="", ylab="")
 

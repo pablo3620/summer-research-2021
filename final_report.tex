@@ -114,14 +114,23 @@ NZ combined and also for each region independently.
 \begin{figure}
 \centering
 \includegraphics{final_report_files/figure-latex/consum_decomp_plot-1.pdf}
-\caption{Multiplicative Time Series Decomposition of Flip the Fleet
-Average Consumption for all of NZ\label{fig:consum_decomp_plot}}
+\caption{Multiplicative time series decomposition of flip the fleet
+average consumption for all of NZ\label{fig:consum_decomp_plot}}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics{final_report_files/figure-latex/acf_consum-1.pdf}
+\caption{Autocorrelation plot of flip the fleet average consumption for
+all of NZ\label{fig:acf_consum}}
 \end{figure}
 
 The time series decomposition (Figure \ref{fig:consum_decomp_plot})
-shows a very clear seasonal trend. This seasonal trend going from 0.96
-times the mean consumption in February to 1.07 times the mean
-consumption in February, A peak to peak difference of 10.7\%.
+shows a very clear seasonal trend. The autocorrelation plot (Figure
+\ref{fig:acf_consum}) shows that this yearly trend is significant. This
+seasonal trend going from 0.96 times the mean consumption in February to
+1.07 times the mean consumption in February, A peak to peak difference
+of 10.7\%.
 
 As NZ weather differs significantly by region, to test the hypothesis
 that EV consumption is correlated with heating degree days we must limit
@@ -201,12 +210,26 @@ To find if a seasonal trend in fuel usage in NZ fuel trade data
 Employment (MBIE) is used. This data set quarterly data in broken down
 by fuel type and sector. This allows the isolation of petrol usage in
 domestic land transport which should be an accurate representation of
-the fuel usage by light passenger vehicles.
+the fuel usage by light passenger vehicles. Fuel trade data from 2020
+was excluded as lockdowns were not an accurate representation of the
+general driving patterns of the NZ population.
 
 \begin{figure}
 \centering
 \includegraphics{final_report_files/figure-latex/petrol_ts-1.pdf}
-\caption{Decomposition of Multiplicative Petrol Usage Time Series}
+\caption{Multiplicative time series decomposition of petrol usage in
+domestic land transport\label{fig:petrol_ts}}
+\end{figure}
+
+Figure \ref{fig:petrol_ts} decomposition shows a seasonal trend,
+however, it is of relatively small magnitude compared to the random
+variations suggesting this trend may not be significant.
+
+\begin{figure}
+\centering
+\includegraphics{final_report_files/figure-latex/acf_petrol-1.pdf}
+\caption{Autocorrelation of petrol usage in domestic land
+transport\label{fig:acf:petrol}}
 \end{figure}
 
 \hypertarget{model}{%
