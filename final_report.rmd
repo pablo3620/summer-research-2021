@@ -277,13 +277,75 @@ summary(eff_lm_model) %>% pander
 ```
 
 
+#### How to read this table:
+When computing the linear model as Auckland and Nissan Leaf (24 kWh) 2013-2016 are the most common region and model they are used for the intercept. In order to get the expected consumption of a vehicle we start with the (Intercept) Estimate. We then add to this consumption estimate the corresponding region and model Estimate (not needed if it is Auckland or Nissan Leaf (24 kWh) 2013-2016). Number of HDD per day is then multiplied by the HDD Estimate from the table and added to the consumption estimate. Similarly for CDD days number of CDD per day is then multiplied by the CDD Estimate from the table and added to this consumption estimate.
+
 The HDD term suggests that as the average number of heating degree days per days increases by 1 the average power consumption of EVs for the month increases by `r formatC(eff_lm_model$coefficients["HDD"], digits=3, format="fg", flag="#")`Wh/km. With a p-value of $<2\times10^{-16}$ we are quite confident on this value. 
 
 The CDD term suggests that as the average number of cooling degree days per days increases by 1 the average power consumption of EVs for the month increases by `r formatC(eff_lm_model$coefficients["CDD"], digits=3, format="fg", flag="#")`Wh/km. With a p-value of $4.11\times10^{-5}$ we are less confident on this value. This is likely as there is much less data in New Zealand regarding cooling degree days.
 
 
+## Predictions
+
+Assumptions made with these predictions are therefore:
+
+\begin{itemize}
+\item Regional VKT data remains relatively consistent with 2019 VKT data. 2019 is chosen as in NZ there has been a significant increase in VKT in recent years excluding 2020 as there was a significant decrease due to lockdown. As lockdown is an outlier event it would be preferable to not include this in the model so 2019 is used.
+\item Regional weather data from 2017 to 2021 remains consistent with future climate of NZ.
+\item Flip the Fleet's fleet is representative NZs future EV fleet.
+\item Actual VKT of each region remains relatively constant throughout the year.
+\end{itemize}
 
 
+```{r Auckland_power, fig.cap="Auckland Region 100% EV Case Total Power Usage per Month\\label{fig:Auckland_power}"}
+par(mar = c(3, 4, 1, 1))
+
+plot(power_usage$Auckland_fit, type = 'b', xaxt = "n",
+     xlab = "", ylab = "Monthly Power Usage (GWh)", ylim = c(min(power_usage[,4:6]),max(power_usage[,4:6])),las = 1)
+axis(1, labels = month.abb, at = 1:12, las = 1)
+
+points(1:12,power_usage$Auckland_upr, type = 'l',lty = 2 , col = 2, xlab="", ylab="")
+
+points(1:12,power_usage$Auckland_lwr, type = 'l',lty = 2, col = 3, xlab="", ylab="")
+
+
+legend("topright", inset = legend_inset , legend = c("fit", "upper estimate", "lower estimate"), lty = c(1,2,2), col = 1:3)
+```
+
+
+Combining Auckland only NZTA 2019 VKT with the consumption linear model using Flip the Fleets vehicle make up and average weather data from 2017-2021 Figure \ref{fig:Auckland_power} the estimated power usage per month showing a clear seasonal trend from around `r round(min(power_usage$Auckland_fit),1)` GWh per month in summer to around `r round(max(power_usage$Auckland_fit),1)` GWh per month in the winter.
+
+The upper and lower estimate are 95% confidence interval on the linear model. As confidence intervals are unknown for the future VKT and future weather the confidence intervals do not include this uncertainty. (should i just remove from the plot as do not have much meaning) 
+
+
+```{r NZ_power, fig.cap="NZ 100% EV Case Total Power Usage per Month\\label{fig:NZ_power}"}
+par(mar = c(3, 4, 1, 1))
+plot(power_usage$total_fit, type = 'b', xaxt = "n", xlab = "", ylab = "Monthly Power Usage (GWh)", las = 1)
+axis(1, labels = month.abb, at = 1:12, las = 1)
+```
+
+
+Similarly NZTA 2019 regional VKT combined with the consumption linear model using Flip the Fleets vehicle make up and average regional weather data from 2017-2021 and adding all regions power usage Figure \ref{fig:NZ_power} a clear a clear seasonal trend from around `r round(min(power_usage$total_fit),0)` GWh per month in summer to around `r round(max(power_usage$total_fit),0)` GWh per month in the winter.
+
+
+```{r NZ_region_power_prop, fig.cap="All NZ Regions Monthly Proportional Change in Power Usage Relative to its Yearly Average\\label{fig:NZ_region_power_prop}"}
+power_usage_prop %>%
+  tibble::rownames_to_column("month") %>% 
+  mutate(across(month, as.numeric)) %>% 
+  gather(key = "Region", value = value, -month) %>% 
+  mutate(across(Region, fct_inorder)) %>% 
+  ggplot(aes(x = month, y = value, color = Region, size = Region)) +
+    scale_size_manual(values = c(rep(0.5,14), 1.5)) +
+    scale_color_manual(values = c(colorRampPalette(c("blue", "red", "green"))(14) ,1)) +
+    scale_x_discrete(limits = month.abb) +
+    ylab("Power Usage Proportional Change") +
+    xlab("") +
+    geom_line() +
+    gg_theme
+```
+
+
+Doing this same process for all regions we can also plot each regions proportional change in power usage relative to its yearly average. Figure \ref{fig:NZ_region_power_prop} shows all regions follow a similar seasonal change in power consumption. Of note regions like Northland and Auckland appear to have less of a seasonal trend compared to regions such as Otago and the West Coast likely due to a warmer climate leading to increased AC usage during the summer months decreasing efficiency in the summer month. 
 
 
 
