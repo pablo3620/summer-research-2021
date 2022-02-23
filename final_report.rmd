@@ -196,13 +196,10 @@ acf(decomp_petrol$x, main = "")
 The autocorrelation plot (figure \ref{fig:acf_petrol}) suggest that there might be a slight trend in petrol usage however it does not appear to be of much significance. 
 
 
-Fuel trade data can be compared to the VKT data from NZTA. VKT data including quarterly data of 10 regions plus one "other" region was given by Haobo Wang from NZTA for use in this project. Further data on yearly VKT for the "other" regions, the vehicle fuel type and vehicle type was collected from the publicly available fleet statistics page on NZTA's website.
+Fuel trade data can be compared to the VKT data from NZTA. VKT data including quarterly data of 10 regions plus one "other" region was given by Haobo Wang from NZTA for use in this project. Further yearly data for VKT of the "other" regions, the vehicle fuel type and vehicle type was collected from the publicly available fleet statistics page on NZTA's website. The quarterly VKT data was then multiplied by the proportion of VKT that was attributed to light passenger vehicles in that year.
 
-need to write more
-
-
-```{r VKT_ts, fig.cap="Decomposition of NZ all regions VKT Time Series\\label{fig:VKT_ts}", warning=FALSE, message=FALSE, fig.height=6}
-decomp_vkt = vkt_quart[vkt_quart$year >= 2003,]$total %>% 
+```{r VKT_ts, fig.cap="Decomposition of NZ all regions passenger VKT Time Series\\label{fig:VKT_ts}", warning=FALSE, message=FALSE, fig.height=6}
+decomp_vkt = vkt_quart_pass[vkt_quart_pass$year >= 2003,]$total %>% 
   ts(frequency = 4, start = min(2003)) %>% 
   decompose("multiplicative")
 
@@ -239,7 +236,7 @@ legend("topright", inset = legend_inset, legend = c("EV consumption", "Petrol Us
 
 Looking at the Seasonal trend of Petrol Usage and VKT data from NZTA, we can see an obvious decrease in the winter months with a peak in the 4th quarter likely corresponding to holiday travel. Petrol Usage shows this variation to be much larger than the VKT data from NZTA. It is unclear whether this would be due to the smoothing effect as was previously discussed regarding the NZTA data, or perhaps a change in efficiency for petrol vehicle by seasons similar to that of the EV. Combining these 2 data sets it is reasonable to suggest that in New Zealand, compared to the winter (Q2 and Q3) VKT, the true VKT in the summer (Q1 and Q4) is between `r round((mean(decomp_vkt$figure[c(4,1)])/mean(decomp_vkt$figure[2:3])-1)*100,1)`\% higher, as suggested by the VKT data from NZTA, to `r round((mean(decomp_petrol$figure[c(4,1)])/mean(decomp_petrol$figure[2:3])-1)*100,1)`\% higher, according to the petrol usage data.
 
-Looking at the seasonal trend of EV consumption we can see a much larger increase in consumption in the winter months, with average consumption in July being `r round(abs(max(decomp_consum$figure)/min(decomp_consum$figure)-1)*100, 1)`\% higher consumption than in February. From the plot we can see that when consumption of EVs increases, VKT goes down, suggesting that some increase in total power usage due to EVs increase in consumption will be countered by the decrease in VKT. However, the increase in consumption is much larger than than the decrease in VKT. This, combined with the fact that winter is when our electricity grid in New Zealand is already under strain due to heating demand, suggests that if we ignore the relatively small change in VKT in our model we can effectively model a worst case scenario. Thus we propose that distance ($d_{R}$) in our model is given by the yearly regional VKT data from 2019 and has no dependency on month.
+Looking at the seasonal trend of EV consumption we can see a much larger increase in consumption in the winter months, with average consumption in July being `r round(abs(max(decomp_consum$figure)/min(decomp_consum$figure)-1)*100, 1)`\% higher consumption than in February. From the plot we can see that when consumption of EVs increases, VKT goes down, suggesting that some increase in total power usage due to EVs increase in consumption will be countered by the decrease in VKT. However, the increase in consumption is much larger than than the decrease in VKT. This, combined with the fact that winter is when our electricity grid in New Zealand is already under strain due to heating demand, suggests that if we ignore the relatively small change in VKT in our model we can effectively model a worst case scenario. Thus we propose that distance ($d_{R}$) in our model is given by the yearly regional VKT data from 2019 and has no dependency on month. 
 
 
 
@@ -282,7 +279,12 @@ summary(eff_lm_model) %>% pander
 
 The HDD term suggests that as the average number of heating degree days per days increases by 1 the average power consumption of EVs for the month increases by `r formatC(eff_lm_model$coefficients["HDD"], digits=3, format="fg", flag="#")`Wh/km. With a p-value of $<2\times10^{-16}$ we are quite confident on this value. 
 
-The CDD term suggests that as the average number of cooling degree days per days increases by 1 the average power consumption of EVs for the month increases by `r formatC(eff_lm_model$coefficients["CDD"], digits=3, format="fg", flag="#")`Wh/km. With a p-value of $4.11\times10^{-5}$ we are less confident on this value. This is likely as there is much less data in New Zealand regarding cooling degree days
+The CDD term suggests that as the average number of cooling degree days per days increases by 1 the average power consumption of EVs for the month increases by `r formatC(eff_lm_model$coefficients["CDD"], digits=3, format="fg", flag="#")`Wh/km. With a p-value of $4.11\times10^{-5}$ we are less confident on this value. This is likely as there is much less data in New Zealand regarding cooling degree days.
+
+
+
+
+
 
 
 \begin{thebibliography}{9}
