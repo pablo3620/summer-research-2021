@@ -369,6 +369,46 @@ power_usage_prop %>%
 Doing this same process for all regions we can also plot each regions proportional change in power usage relative to its yearly average. Figure \ref{fig:NZ_region_power_prop} shows all regions follow a similar seasonal change in power consumption. Of note regions like Northland and Auckland appear to have less of a seasonal trend compared to regions such as Otago and the West Coast likely due to a warmer climate leading to increased AC usage during the summer months decreasing efficiency in the summer month. 
 
 
+```{r vehicle_power_usage, fig.cap="2019 VKT 100% EV Case NZ Total Power Usage Scenarios by Vehicle Fleet Model Makeup\\label{fig:vehicle_power_usage}"}
+limit_power_usage %>% 
+  select(total_best,total_worst,tesla_s) %>% 
+  cbind("Flip the fleet average" = power_usage$total_fit) %>% 
+  rename("Hyundai Ioniq" = total_best, "Nissan Leaf (62 kWh)" = total_worst, "Tesla Model S" = tesla_s) %>% 
+  tibble::rownames_to_column("month") %>% 
+  mutate(across(month, as.numeric)) %>% 
+  gather(key = "Vehicle", value = value, -month) %>% 
+  ggplot(aes(x = month, y = value, color = Vehicle)) +
+    scale_x_discrete(limits = month.abb) +
+    gg_color_palette +
+    ylab("Monthly Power Usage (GWh)") +
+    xlab("") +
+    geom_line() +
+    gg_theme
+```
+
+```{r vehicle_power_usage_auck, fig.cap="2019 VKT 100% EV Case Auckland Total Power Usage Scenarios by Vehicle Fleet Model Makeup\\label{fig:vehicle_power_usage_auck}"}
+limit_power_usage %>% 
+  select("Auckland_Hyundai Ioniq (EV)","Auckland_Nissan Leaf (62 kWh)","Auckland_Tesla Model S") %>% 
+  cbind("Flip the fleet average" = power_usage$Auckland_fit) %>% 
+  rename("Hyundai Ioniq" = "Auckland_Hyundai Ioniq (EV)", "Nissan Leaf (62 kWh)" = "Auckland_Nissan Leaf (62 kWh)", "Tesla Model S" = "Auckland_Tesla Model S") %>% 
+  tibble::rownames_to_column("month") %>% 
+  mutate(across(month, as.numeric)) %>% 
+  gather(key = "Vehicle", value = value, -month) %>% 
+  ggplot(aes(x = month, y = value, color = Vehicle)) +
+    scale_x_discrete(limits = month.abb) +
+    gg_color_palette +
+    ylab("Monthly Power Usage (GWh)") +
+    xlab("") +
+    geom_line() +
+    gg_theme
+```
+
+
+Combining the regional consumption used to plot figure \ref{fig:vehicle_consum} with the 2019 VKT number we can get an expected power usage for all of NZ and also for each VKT region. Figure \ref{fig:vehicle_power_usage} shows with a 100% EV penetration and an EV fleet comparable to the Flip the Fleet, the monthly power usage for all of NZ goes from `r round(min(power_usage$total_fit),0)` GWh minimum in the summer to `r round(max(power_usage$total_fit),0)` GWh maximum power usage in the winter. If the fleet consisted of heavier less efficient vehicles like the Tesla Model S this would increase to `r round(min(limit_power_usage$tesla_s),0)` GWh minimum in the summer to `r round(max(limit_power_usage$tesla_s),0)` GWh maximum power usage in the winter. Figure \ref{fig:vehicle_power_usage_auck} shows with a 100% EV penetration and an EV fleet comparable to the Flip the Fleet, the monthly power usage of Auckland goes from `r round(min(power_usage$Auckland_fit),0)` GWh minimum in the summer to `r round(max(power_usage$Auckland_fit),0)` GWh maximum power usage in the winter. If the fleet consisted of heavier less efficient vehicles like the Tesla Model S this would increase to `r round(min(limit_power_usage$"Auckland_Tesla Model S"),0)` GWh minimum in the summer to `r round(max(limit_power_usage$"Auckland_Tesla Model S"),0)` GWh maximum power usage in the winter.
+
+Figure \ref{fig:vehicle_power_usage} and Figure \ref{fig:vehicle_power_usage_auck} while showing a seasonal trend, shows that the vehicle make up of the fleet can have a much greater impact than anything else on the actual power consumption that EVs will have on the power grid. 
+
+
 ### Comparison and Incorporation of Times Model Predictions
 
 To compare our predictions and see how they fit in with other well established models, ECCA Times Model \cite{times_model} is used as a comparison. For this, VKT and expected power usage by expected passenger vehicle EVs for selected years between 2018 to 2060 was downloaded from EECA. Expected consumption (Wh/km) assumed by ECCA was then calculated by dividing power usage by VKT. 
@@ -389,6 +429,38 @@ points(1:12, rep(times_tui_VKT$consumption[times_tui_VKT$year == 2060],12), type
 axis(1, labels = month.abb, at = 1:12, las = 1)
 legend("bottomright", inset = legend_inset, legend = c("Hyundai Ioniq", "Flip the fleet average", "Nissan Leaf (62 kWh)","Tesla Model S", "Times Model 2018", "Times Model 2060"), lty = c(1,1,1,1,2,2), col = c(4,1,2,5,3,6), pch = c(1,1,1,1,NA,NA))
 ```
+
+
+Figure \ref{fig:vehicle_consum} shows comparing flip the fleet consumption numbers to EECA's times tui model \cite{times_model} consumption we can see that ECCA's times model is based on a much higher consumption (lower efficiency) than the flip the fleet data would suggest. With the consumption model using the flip the fleet vehicle make up suggests an average of `r round(mean(power_usage$total_fit_consumption),1)`Wh/km. However, this is consisting of primarily of Nissan leafs with `r sum(model_pop$count[c(1,2,3,4,11)])` out of `r sum(model_pop$count)` vehicles included in the flip the fleet data being Nissan leafs which is a quite light and efficient EV. The 2018 times model consumption is much more comparable to much heavier and less efficient Tesla Model S (based on `r sum(EV_data$model == "Tesla Model S")` months of efficiency data from `r model_pop$count[model_pop$model == "Tesla Model S"]` vehicles). 
+
+
+```{r kea_power_usage, fig.cap="NZ EVs Power Usage per Month using EECAs kea VKT and Flip the Fleets Average Consumption\\label{fig:kea_power_usage}"}
+kea_power_usage[kea_power_usage$Region == "total" & kea_power_usage$year %in% c(2018,2030,2040,2050,2060),] %>% 
+  mutate(across(year, as.factor)) %>%
+  ggplot(aes(x = month, y = value, color = year)) +
+    scale_x_discrete(limits = month.abb) +
+    gg_color_palette + 
+    ylab("Total NZ Power Usage per Month (GWh)")+
+    xlab("") +
+    geom_line() +
+    gg_theme
+```
+
+
+
+```{r tui_power_usage, fig.cap="NZ EVs Power Usage per Month using EECAs Tui VKT and Flip the Fleets Average Consumption\\label{fig:tui_power_usage}"}
+tui_power_usage[tui_power_usage$Region == "total" & tui_power_usage$year %in% c(2018,2030,2040,2050,2060),] %>% 
+  mutate(across(year, as.factor)) %>%
+  ggplot(aes(x = month, y = value, color = year)) +
+    scale_x_discrete(limits = month.abb) +
+    gg_color_palette + 
+    ylab("Total NZ Power Usage per Month (GWh)")+
+    xlab("") +
+    geom_line() +
+    gg_theme
+```
+
+Figure \ref{fig:kea_power_usage} and Figure \ref{fig:tui_power_usage} use our consumption model with Flip the Fleets vehicle make up, NZ region weather from 2017 to 2021 and NZTA VKT regional proportions combined with ECCA times models expected passenger EV VKT to estimate total monthly power usage of NZ by passenger EVs for select years between 2018 and 2060. 
 
 
 

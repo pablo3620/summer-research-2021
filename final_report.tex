@@ -573,6 +573,43 @@ such as Otago and the West Coast likely due to a warmer climate leading
 to increased AC usage during the summer months decreasing efficiency in
 the summer month.
 
+\begin{figure}
+\centering
+\includegraphics{final_report_files/figure-latex/vehicle_power_usage-1.pdf}
+\caption{2019 VKT 100\% EV Case NZ Total Power Usage Scenarios by
+Vehicle Fleet Model Makeup\label{fig:vehicle_power_usage}}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics{final_report_files/figure-latex/vehicle_power_usage_auck-1.pdf}
+\caption{2019 VKT 100\% EV Case Auckland Total Power Usage Scenarios by
+Vehicle Fleet Model Makeup\label{fig:vehicle_power_usage_auck}}
+\end{figure}
+
+Combining the regional consumption used to plot figure
+\ref{fig:vehicle_consum} with the 2019 VKT number we can get an expected
+power usage for all of NZ and also for each VKT region. Figure
+\ref{fig:vehicle_power_usage} shows with a 100\% EV penetration and an
+EV fleet comparable to the Flip the Fleet, the monthly power usage for
+all of NZ goes from 416 GWh minimum in the summer to 453 GWh maximum
+power usage in the winter. If the fleet consisted of heavier less
+efficient vehicles like the Tesla Model S this would increase to 540 GWh
+minimum in the summer to 577 GWh maximum power usage in the winter.
+Figure \ref{fig:vehicle_power_usage_auck} shows with a 100\% EV
+penetration and an EV fleet comparable to the Flip the Fleet, the
+monthly power usage of Auckland goes from 128 GWh minimum in the summer
+to 137 GWh maximum power usage in the winter. If the fleet consisted of
+heavier less efficient vehicles like the Tesla Model S this would
+increase to 167 GWh minimum in the summer to 176 GWh maximum power usage
+in the winter.
+
+Figure \ref{fig:vehicle_power_usage} and Figure
+\ref{fig:vehicle_power_usage_auck} while showing a seasonal trend, shows
+that the vehicle make up of the fleet can have a much greater impact
+than anything else on the actual power consumption that EVs will have on
+the power grid.
+
 \hypertarget{comparison-and-incorporation-of-times-model-predictions}{%
 \subsubsection{Comparison and Incorporation of Times Model
 Predictions}\label{comparison-and-incorporation-of-times-model-predictions}}
@@ -590,6 +627,39 @@ by dividing power usage by VKT.
 \caption{NZ Vehicle Average Consumption
 Scenarios\label{fig:vehicle_consum}}
 \end{figure}
+
+Figure \ref{fig:vehicle_consum} shows comparing flip the fleet
+consumption numbers to EECA's times tui model \cite{times_model}
+consumption we can see that ECCA's times model is based on a much higher
+consumption (lower efficiency) than the flip the fleet data would
+suggest. With the consumption model using the flip the fleet vehicle
+make up suggests an average of 148.6Wh/km. However, this is consisting
+of primarily of Nissan leafs with 1078 out of 1264 vehicles included in
+the flip the fleet data being Nissan leafs which is a quite light and
+efficient EV. The 2018 times model consumption is much more comparable
+to much heavier and less efficient Tesla Model S (based on 81 months of
+efficiency data from 5 vehicles).
+
+\begin{figure}
+\centering
+\includegraphics{final_report_files/figure-latex/kea_power_usage-1.pdf}
+\caption{NZ EVs Power Usage per Month using EECAs kea VKT and Flip the
+Fleets Average Consumption\label{fig:kea_power_usage}}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics{final_report_files/figure-latex/tui_power_usage-1.pdf}
+\caption{NZ EVs Power Usage per Month using EECAs Tui VKT and Flip the
+Fleets Average Consumption\label{fig:tui_power_usage}}
+\end{figure}
+
+Figure \ref{fig:kea_power_usage} and Figure \ref{fig:tui_power_usage}
+use our consumption model with Flip the Fleets vehicle make up, NZ
+region weather from 2017 to 2021 and NZTA VKT regional proportions
+combined with ECCA times models expected passenger EV VKT to estimate
+total monthly power usage of NZ by passenger EVs for select years
+between 2018 and 2060.
 
 \begin{thebibliography}{9}
 \bibitem{ev_range}
