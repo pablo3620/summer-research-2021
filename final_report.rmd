@@ -129,7 +129,7 @@ plot(decomp_auck_HDD$figure, type = 'b', col = 2, xlab="", ylab="",axes=FALSE)
 mtext("Average Heating Degree (° Days per Day) (Base temp 16°C)", side=4, line=2, cex = 1, padj = 1, col = 1) 
 axis(4, las = 1, col = 2, col.axis = 2)
 
-legend("topright", inset = legend_inset, legend = c("EV Consumption", "HDD"), lty = 1, col = 1:2)
+legend("topright", inset = legend_inset, legend = c("EV Consumption", "HDD"), lty = 1, col = 1:2, pch = 1)
 ```
 
 
@@ -221,7 +221,7 @@ Looking at the long term trend, VKT remained largely flat between 2004 and 2012 
 
 
 ```{r petrol_VKT_vs_eff, fig.cap="NZ Seasonal Component Decompostions"}
-par(mar = c(3, 4, 1, 1))
+par(margins)
 plot(decomp_consum$figure, type = 'b', xaxt = "n",
      xlab = "", ylab = "Proportional Change", las = 1)
 axis(1, labels = month.abb, at = 1:12, las = 1)
@@ -284,6 +284,27 @@ The HDD term suggests that as the average number of heating degree days per days
 
 The CDD term suggests that as the average number of cooling degree days per days increases by 1 the average power consumption of EVs for the month increases by `r formatC(eff_lm_model$coefficients["CDD"], digits=3, format="fg", flag="#")`Wh/km. With a p-value of $4.11\times10^{-5}$ we are less confident on this value. This is likely as there is much less data in New Zealand regarding cooling degree days.
 
+```{r consum_den, fig.cap="distribution of linear model coeffients (effectivly \"baseline\" consumption by region for each region)\\label{fig:consum_den}", message = FALSE}
+coef = eff_lm_model$coefficients
+region_coef = coef[grepl("Region_", names(coef))]
+model_coef = coef[grepl("Model_", names(coef))]
+data.frame(outer(c(0,region_coef), c(0,model_coef), `+`)) %>% 
+  `colnames<-` (model_pop$model) %>% 
+  `rownames<-` (region_pop$weather_region) %>% 
+  tibble::rownames_to_column("Region") %>% 
+  pivot_longer(cols = -1, names_to = "Model", values_to = "Consumption") %>% 
+  mutate(across(Region, fct_inorder)) %>% 
+  mutate(across(Model, fct_inorder)) %>% 
+  mutate(Consumption = Consumption + coef[1]) %>% 
+  ggplot(aes(x = Region, y = Consumption)) +
+    scale_x_discrete(guide = guide_axis(n.dodge = 2)) +
+    geom_violin() +
+    geom_dotplot(binaxis='y', stackdir='center', dotsize = 0.5) +
+    # geom_jitter(position = position_jitter(0.2))
+    gg_theme
+
+```
+
 
 ## Predictions
 
@@ -298,7 +319,7 @@ Assumptions made with these predictions are therefore:
 
 
 ```{r Auckland_power, fig.cap="Auckland Region 100% EV Case Total Power Usage per Month\\label{fig:Auckland_power}"}
-par(mar = c(3, 4, 1, 1))
+par(margins)
 
 plot(power_usage$Auckland_fit, type = 'b', xaxt = "n",
      xlab = "", ylab = "Monthly Power Usage (GWh)", ylim = c(min(power_usage[,4:6]),max(power_usage[,4:6])),las = 1)
@@ -309,7 +330,7 @@ points(1:12,power_usage$Auckland_upr, type = 'l',lty = 2 , col = 2, xlab="", yla
 points(1:12,power_usage$Auckland_lwr, type = 'l',lty = 2, col = 3, xlab="", ylab="")
 
 
-legend("topright", inset = legend_inset , legend = c("fit", "upper estimate", "lower estimate"), lty = c(1,2,2), col = 1:3)
+legend("topright", inset = legend_inset , legend = c("fit", "upper estimate", "lower estimate"), lty = c(1,2,2), col = 1:3, pch = c(1, NA, NA))
 ```
 
 
@@ -319,7 +340,7 @@ The upper and lower estimate are 95% confidence interval on the linear model. As
 
 
 ```{r NZ_power, fig.cap="NZ 100% EV Case Total Power Usage per Month\\label{fig:NZ_power}"}
-par(mar = c(3, 4, 1, 1))
+par(margins)
 plot(power_usage$total_fit, type = 'b', xaxt = "n", xlab = "", ylab = "Monthly Power Usage (GWh)", las = 1)
 axis(1, labels = month.abb, at = 1:12, las = 1)
 ```
@@ -346,6 +367,29 @@ power_usage_prop %>%
 
 
 Doing this same process for all regions we can also plot each regions proportional change in power usage relative to its yearly average. Figure \ref{fig:NZ_region_power_prop} shows all regions follow a similar seasonal change in power consumption. Of note regions like Northland and Auckland appear to have less of a seasonal trend compared to regions such as Otago and the West Coast likely due to a warmer climate leading to increased AC usage during the summer months decreasing efficiency in the summer month. 
+
+
+### Comparison and Incorporation of Times Model Predictions
+
+To compare our predictions and see how they fit in with other well established models, ECCA Times Model \cite{times_model} is used as a comparison. For this, VKT and expected power usage by expected passenger vehicle EVs for selected years between 2018 to 2060 was downloaded from EECA. Expected consumption (Wh/km) assumed by ECCA was then calculated by dividing power usage by VKT. 
+
+
+```{r vehicle_consum, fig.cap="NZ Vehicle Average Consumption Scenarios\\label{fig:vehicle_consum}"}
+par(margins)
+plot(limit_power_usage$total_best_consumption, type = 'b', xaxt = "n", xlab = "", ylab = "EV Average Consumption (Wh/km)", ylim = c(0, 210), col = 4, las = 1)
+
+points(1:12, limit_power_usage$total_worst_consumption, type = 'b', col = 2, xlab="", ylab="")
+points(1:12, limit_power_usage$tesla_s_consumption, type = 'b', col = 5, xlab="", ylab="")
+points(1:12, power_usage$total_fit_consumption, type = 'b', col = 1, xlab="", ylab="")
+
+
+points(1:12, rep(times_tui_VKT$consumption[times_tui_VKT$year == 2018],12), type = 'l',lty = 2, col = 3, xlab="", ylab="")
+points(1:12, rep(times_tui_VKT$consumption[times_tui_VKT$year == 2060],12), type = 'l',lty = 2, col = 6, xlab="", ylab="")
+
+axis(1, labels = month.abb, at = 1:12, las = 1)
+legend("bottomright", inset = legend_inset, legend = c("Hyundai Ioniq", "Flip the fleet average", "Nissan Leaf (62 kWh)","Tesla Model S", "Times Model 2018", "Times Model 2060"), lty = c(1,1,1,1,2,2), col = c(4,1,2,5,3,6), pch = c(1,1,1,1,NA,NA))
+```
+
 
 
 

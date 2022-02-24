@@ -4,6 +4,11 @@
 %
 \documentclass[
 ]{article}
+\title{Exploring the seasonal variation in electric vehicle charging in
+New Zealand}
+\author{Pablo Paulsen}
+\date{18/02/2022}
+
 \usepackage{amsmath,amssymb}
 \usepackage{lmodern}
 \usepackage{iftex}
@@ -75,11 +80,6 @@
 \ifLuaTeX
   \usepackage{selnolig}  % disable illegal ligatures
 \fi
-
-\title{Exploring the seasonal variation in electric vehicle charging in
-New Zealand}
-\author{Pablo Paulsen}
-\date{18/02/2022}
 
 \begin{document}
 \maketitle
@@ -390,11 +390,11 @@ have more dependency towards the temperature at times such as the
 morning or evening commute hours.
 
 \begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.4051}}
-  >{\raggedleft\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.1392}}
-  >{\raggedleft\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.1646}}
-  >{\raggedleft\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.1266}}
-  >{\raggedleft\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.1646}}@{}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.41}}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.14}}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.16}}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.13}}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.16}}@{}}
 \toprule
 \begin{minipage}[b]{\linewidth}\raggedright
 ~
@@ -447,10 +447,10 @@ Model\_Peugeot e-208 & 10.96 & 9.581 & 1.144 & 0.2525 \\
 \end{longtable}
 
 \begin{longtable}[]{@{}
-  >{\raggedleft\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.2083}}
-  >{\raggedleft\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.3056}}
-  >{\raggedleft\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.1250}}
-  >{\raggedleft\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.2361}}@{}}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.21}}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.31}}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.12}}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.24}}@{}}
 \caption{Fitting linear model: consumption \textasciitilde{} HDD + CDD +
 Region\_ + Model\_}\tabularnewline
 \toprule
@@ -506,6 +506,14 @@ month increases by 2.35Wh/km. With a p-value of \(4.11\times10^{-5}\) we
 are less confident on this value. This is likely as there is much less
 data in New Zealand regarding cooling degree days.
 
+\begin{figure}
+\centering
+\includegraphics{final_report_files/figure-latex/consum_den-1.pdf}
+\caption{distribution of linear model coeffients (effectivly
+``baseline'' consumption by region for each
+region)\label{fig:consum_den}}
+\end{figure}
+
 \hypertarget{predictions}{%
 \subsection{Predictions}\label{predictions}}
 
@@ -528,8 +536,8 @@ Month\label{fig:Auckland_power}}
 Combining Auckland only NZTA 2019 VKT with the consumption linear model
 using Flip the Fleets vehicle make up and average weather data from
 2017-2021 Figure \ref{fig:Auckland_power} the estimated power usage per
-month showing a clear seasonal trend from around 130.8 GWh per month in
-summer to around 140.4 GWh per month in the winter.
+month showing a clear seasonal trend from around 127.7 GWh per month in
+summer to around 137.1 GWh per month in the winter.
 
 The upper and lower estimate are 95\% confidence interval on the linear
 model. As confidence intervals are unknown for the future VKT and future
@@ -546,8 +554,8 @@ Month\label{fig:NZ_power}}
 Similarly NZTA 2019 regional VKT combined with the consumption linear
 model using Flip the Fleets vehicle make up and average regional weather
 data from 2017-2021 and adding all regions power usage Figure
-\ref{fig:NZ_power} a clear a clear seasonal trend from around 425 GWh
-per month in summer to around 463 GWh per month in the winter.
+\ref{fig:NZ_power} a clear a clear seasonal trend from around 416 GWh
+per month in summer to around 453 GWh per month in the winter.
 
 \begin{figure}
 \centering
@@ -564,6 +572,24 @@ Auckland appear to have less of a seasonal trend compared to regions
 such as Otago and the West Coast likely due to a warmer climate leading
 to increased AC usage during the summer months decreasing efficiency in
 the summer month.
+
+\hypertarget{comparison-and-incorporation-of-times-model-predictions}{%
+\subsubsection{Comparison and Incorporation of Times Model
+Predictions}\label{comparison-and-incorporation-of-times-model-predictions}}
+
+To compare our predictions and see how they fit in with other well
+established models, ECCA Times Model \cite{times_model} is used as a
+comparison. For this, VKT and expected power usage by expected passenger
+vehicle EVs for selected years between 2018 to 2060 was downloaded from
+EECA. Expected consumption (Wh/km) assumed by ECCA was then calculated
+by dividing power usage by VKT.
+
+\begin{figure}
+\centering
+\includegraphics{final_report_files/figure-latex/vehicle_consum-1.pdf}
+\caption{NZ Vehicle Average Consumption
+Scenarios\label{fig:vehicle_consum}}
+\end{figure}
 
 \begin{thebibliography}{9}
 \bibitem{ev_range}
